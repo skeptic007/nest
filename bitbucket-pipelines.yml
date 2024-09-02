@@ -1,0 +1,33 @@
+definitions:
+  steps: &steps
+    - step: &base
+        name: '(Dev) Webapp'
+        runs-on: &base-runs-on
+          - 'self.hosted'
+          - 'linux'
+          - 'ebspace'
+        script: &base-code-deploy-pipe
+          - pipe: atlassian/aws-code-deploy:0.2.10
+            variables: &base-code-deploy-vars
+              AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+              AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+              COMMAND: 'upload'
+
+pipelines:
+  branches:
+    dev:
+      - step:
+          name: '(Dev) Webapp'
+          runs-on: *base-runs-on
+          script:
+            - apt install zip
+            - mv cicd/dev/buildspec.yml .
+            - zip -r ebspace-dev-webapp.zip .
+            - <<: *base-code-deploy-pipe
+              variables:
+                <<: *base-code-deploy-vars
+                APPLICATION_NAME: 'ebspace-dev'
+                S3_BUCKET: 'ebspace-code-src/dev'
+                ZIP_FILE: 'ebspace-dev-webapp.zip'
+                VERSION_LABEL: 'ebspace-dev-webapp.zip'
