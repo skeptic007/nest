@@ -30,4 +30,4 @@ pipelines:
                 APPLICATION_NAME: 'ebspace-dev'
                 S3_BUCKET: 'ebspace-code-src/dev'
                 ZIP_FILE: 'ebspace-dev-webapp.zip'
-                VERSION_LABEL: 'ebspace-dev-web.zip'
+                VERSION_LABEL: 'ebspace-dev-webapp.zip'
