@@ -31,3 +31,20 @@ pipelines:
                 S3_BUCKET: 'ebspace-code-src/dev'
                 ZIP_FILE: 'ebspace-dev-webapp.zip'
                 VERSION_LABEL: 'ebspace-dev-webapp.zip'
+
+    stage:
+      - step:
+          name: '(Stage) Webapp'
+          runs-on: *base-runs-on
+          script:
+            - apt install zip
+            - mv cicd/stage/buildspec.yml .
+            - zip -r ebspace-stage-webapp.zip .
+            - <<: *base-code-deploy-pipe
+              variables:
+                <<: *base-code-deploy-vars
+                APPLICATION_NAME: 'ebspace-stage'
+                S3_BUCKET: 'ebspace-code-src/stage'
+                ZIP_FILE: 'ebspace-stage-webapp.zip'
+                VERSION_LABEL: 'ebspace-stage-webapp.zip'
+

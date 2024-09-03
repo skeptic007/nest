@@ -2,8 +2,8 @@
 set -e
 
 aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 082670687034.dkr.ecr.ap-southeast-2.amazonaws.com
-cd /home/ebspace/dev/
-docker-compose pull webapp_dev
-docker-compose rm -s -f webapp_dev
-docker-compose up -d webapp_dev
+cd /home/ebspace/stage/
+docker-compose pull webapp_stage
+docker-compose rm -s -f webapp_stage
+docker-compose up -d webapp_stage
 docker image prune -f
