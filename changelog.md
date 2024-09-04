@@ -1,10 +1,10 @@
 
 # Change Log
 
-## [1.2.4] - 2017-03-15
+## [1.2.4] - 2024-09-4
 
 ### Added
-- Any new added feature list goes here
+- Added the zoom chatbot for the tags of ebspace
  
 ### Changed 
 - Any changed feature list goes here
