@@ -54,7 +54,7 @@ pipelines:
           runs-on:
             - 'self.hosted'
             - 'linux'
-            - 'ebpearls'
+            - 'ebspace'
           script:
             - chmod +x sendmessage
             - ./sendmessage
