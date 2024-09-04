@@ -47,4 +47,14 @@ pipelines:
                 S3_BUCKET: 'ebspace-code-src/stage'
                 ZIP_FILE: 'ebspace-stage-webapp.zip'
                 VERSION_LABEL: 'ebspace-stage-webapp.zip'
-
+  tags:
+    "**":
+      - step:
+          name: Call ZOOM API on New Tag
+          runs-on:
+            - 'self.hosted'
+            - 'linux'
+            - 'ebpearls'
+          script:
+            - chmod +x sendmessage
+            - ./sendmessage
