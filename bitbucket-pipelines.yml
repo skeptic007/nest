@@ -58,3 +58,18 @@ pipelines:
           script:
             - chmod +x sendmessage
             - ./sendmessage
+            
+  pull-requests:
+    '**':  # For triggering the pipeline for all PRs
+      - step:
+          name: Run Trivy Scan
+          runs-on:
+            - 'self.hosted'
+            - 'linux'
+            - 'trivyebspace'
+          image: aquasec/trivy:0.54.1
+          script:
+            - trivy fs --scanners config . > trivy-report.json
+          artifacts:
+            - trivy-report.json
+
