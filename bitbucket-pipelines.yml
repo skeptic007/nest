@@ -65,7 +65,7 @@ pipelines:
           name: Run Trivy Scan
           runs-on:
             - 'self.hosted'
-            - 'linux'
+            - 'macos'
             - 'trivyebspace'
           image: aquasec/trivy:0.54.1
           script:
