@@ -7,7 +7,7 @@
 - Added the zoom chatbot for the tags of ebspace
  
 ### Changed 
-- Any changed feature list goes here
+- ebspace trivy scanning runner fixed
  
 ### Fixed
 - Any bug fixed list goes here
