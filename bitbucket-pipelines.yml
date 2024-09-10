@@ -31,6 +31,16 @@ pipelines:
                 S3_BUCKET: 'ebspace-code-src/dev'
                 ZIP_FILE: 'ebspace-dev-webapp.zip'
                 VERSION_LABEL: 'ebspace-dev-webapp.zip'
+      - step:
+          name: '(Dev) Webapp-snyk'
+          runs-on:
+            - 'self.hosted'
+            - 'macos'
+            - 'snykebspace'
+          script:
+            - 
+          artifcats:
+            - 
 
     stage:
       - step:
