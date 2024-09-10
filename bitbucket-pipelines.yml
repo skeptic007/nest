@@ -38,7 +38,7 @@ pipelines:
             - 'macos'
             - 'snykebspace'
           script:
-            - snyk test --json > snyk-report.json 
+            - snyk test --all-projects --json > snyk-report.json 
           artifacts:
             - snyk-report.json
 
