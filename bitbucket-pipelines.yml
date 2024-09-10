@@ -39,7 +39,7 @@ pipelines:
             - 'snykebspace'
           script:
             - snyk test --json > snyk-report.json 
-          artifcats:
+          artifacts:
             - snyk-report.json
 
     stage:
