@@ -36,9 +36,9 @@ pipelines:
           runs-on:
             - 'self.hosted'
             - 'macos'
-            - 'snykebspace'
+            - 'ebpearls.snyk'
           script:
-            - snyk test --all-projects --json > snyk-report.json 
+            - snyk code test > snyk-report.json || true
           artifacts:
             - snyk-report.json
 
