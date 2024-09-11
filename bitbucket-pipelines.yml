@@ -78,7 +78,7 @@ pipelines:
             - 'macos'
             - 'trivyebspace'
           script:
-            - trivy fs --scanners config,secret,vuln . > trivy-report.json
+            - trivy fs --scanners config,secret,vuln . --format template --template "@trivy-html-template/html.tpl" -o report.html
           artifacts:
             - trivy-report.json
 
