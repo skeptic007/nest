@@ -80,5 +80,5 @@ pipelines:
           script:
             - trivy fs --scanners config,secret,vuln . --format template --template "@/Users/ebpearls/trivy-html-template/html.tpl" -o report.html
           artifacts:
-            - trivy-report.json
+            - report.html
 
