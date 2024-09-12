@@ -38,7 +38,7 @@ pipelines:
             - 'macos'
             - 'ebpearls.snyk'
           script:
-            - snyk code test > snyk-report.json || true
+            - snyk code test > snyk-report.json 
           artifacts:
             - snyk-report.json
 
