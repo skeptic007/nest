@@ -14,7 +14,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import HorizontalBar from './HorizontalBar';
-import Customization from '../Customization';
+// import Customization from '../Customization';
 import MainContentStyled from './MainContentStyled';
 import Loader from 'ui-component/Loader';
 import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
