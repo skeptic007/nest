@@ -74,7 +74,7 @@ const MainLayout: FC<Props> = ({ children }) => {
           {children}
         </Container>
       </MainContentStyled>
-      <Customization />
+      {/* <Customization /> */}
     </Box>
   );
 };

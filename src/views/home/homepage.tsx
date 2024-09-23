@@ -5,16 +5,12 @@ import React from 'react';
 // material-ui
 import { alpha, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import AnimateButton from 'ui-component/extended/AnimateButton';
 import Posts from 'ui-component/cards/Post';
 import MainCard from 'ui-component/cards/MainCard';
 import { gridSpacing } from 'store/constant';
@@ -26,17 +22,17 @@ import { ThemeMode } from 'types/config';
 import { PostDataType, Reply } from 'types/user-profile';
 
 // assets
-import AttachmentTwoToneIcon from '@mui/icons-material/AttachmentTwoTone';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import LayersTwoToneIcon from '@mui/icons-material/LayersTwoTone';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import NavigateNextRoundedIcon from '@mui/icons-material/NavigateNextRounded';
+
 import PeopleAltTwoToneIcon from '@mui/icons-material/PeopleAltTwoTone';
-import PublicTwoToneIcon from '@mui/icons-material/PublicTwoTone';
+
 import RecentActorsTwoToneIcon from '@mui/icons-material/RecentActorsTwoTone';
+import { Card, CardActions, CardContent, CardMedia } from '@mui/material';
+import SubCard from 'ui-component/cards/SubCard';
+
+import UpcomingEvents from 'components/home/UpcomingEvents';
 
 // ==============================|| SOCIAL PROFILE - POST ||============================== //
+const Card1 = '/assets/images/cards/card-1.jpg';
 
 const HomePage = () => {
   const theme = useTheme();
@@ -44,6 +40,12 @@ const HomePage = () => {
   const userState = useSelector((state) => state.user);
   const getPost = async () => {
     dispatch(getPosts());
+  };
+
+  const cardStyle = {
+    bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.main' : 'grey.50',
+    border: '1px solid',
+    borderColor: theme.palette.mode === ThemeMode.DARK ? 'dark.main' : 'grey.100'
   };
 
   React.useEffect(() => {
@@ -103,22 +105,6 @@ const HomePage = () => {
                 <Grid item xs={12}>
                   <TextField id="outlined-textarea" placeholder="What’s on your mind, Larry?" rows={4} fullWidth multiline />
                 </Grid>
-                <Grid item xs={12}>
-                  <Grid container justifyContent="space-between" spacing={gridSpacing}>
-                    <Grid item>
-                      <Button variant="text" color="secondary" startIcon={<AttachmentTwoToneIcon />}>
-                        Gallery
-                      </Button>
-                    </Grid>
-                    <Grid item>
-                      <AnimateButton>
-                        <Button variant="contained" color="secondary" startIcon={<LayersTwoToneIcon />}>
-                          Post
-                        </Button>
-                      </AnimateButton>
-                    </Grid>
-                  </Grid>
-                </Grid>
               </Grid>
             </MainCard>
           </Grid>
@@ -163,12 +149,7 @@ const HomePage = () => {
                   <Typography variant="h3" color="primary" sx={{ mb: 0.625 }}>
                     239k
                   </Typography>
-                  <Typography variant="body2">Friends</Typography>
-                </Grid>
-                <Grid item>
-                  <IconButton size="large" aria-label="navigation icon">
-                    <NavigateNextRoundedIcon />
-                  </IconButton>
+                  <Typography variant="body2">Posts</Typography>
                 </Grid>
               </Grid>
               <Divider sx={{ margin: '16px 0' }} />
@@ -195,77 +176,37 @@ const HomePage = () => {
                   >
                     234k
                   </Typography>
-                  <Typography variant="body2">Followers</Typography>
-                </Grid>
-                <Grid item>
-                  <IconButton size="large" aria-label="navigation icon">
-                    <NavigateNextRoundedIcon />
-                  </IconButton>
+                  <Typography variant="body2">Likes</Typography>
                 </Grid>
               </Grid>
             </MainCard>
           </Grid>
           <Grid item xs={12}>
-            <MainCard>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography variant="h4">About</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography variant="body2">
-                    It is a long established fact that a reader will be distracted by the readable content of a page when looking at its
-                    layout.
-                  </Typography>
-                </Grid>
-              </Grid>
-              <Divider sx={{ margin: '16px 0' }} />
-              <Grid
-                container
-                spacing={2}
-                sx={{
-                  '& >div': {
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    display: 'block',
-                    width: '100%'
-                  },
-                  '& a': {
-                    color: 'grey.700',
-
-                    '& svg': {
-                      mr: 1,
-                      verticalAlign: 'bottom'
-                    },
-                    '&:hover': {
-                      color: 'primary.main',
-                      textDecoration: 'none'
-                    }
-                  }
-                }}
-              >
-                <Grid item xs={12}>
-                  <Link href="https://codedthemes.com/" target="_blank" underline="hover">
-                    <PublicTwoToneIcon color="secondary" /> https://codedthemes.com/
-                  </Link>
-                </Grid>
-                <Grid item xs={12}>
-                  <Link href="https://www.instagram.com/codedthemes" target="_blank" underline="hover">
-                    <InstagramIcon sx={{ color: 'orange.dark' }} /> https://www.instagram.com/codedthemes
-                  </Link>
-                </Grid>
-                <Grid item xs={12}>
-                  <Link href="https://www.facebook.com/codedthemes" target="_blank" underline="hover">
-                    <FacebookIcon color="primary" /> https://www.facebook.com/codedthemes
-                  </Link>
-                </Grid>
-                <Grid item xs={12}>
-                  <Link href="https://in.linkedin.com/company/codedthemes" target="_blank" underline="hover">
-                    <LinkedInIcon sx={{ color: 'grey.900' }} /> https://in.linkedin.com/company/codedthemes
-                  </Link>
-                </Grid>
-              </Grid>
-            </MainCard>
+            <SubCard title="Pinned Events">
+              <Card sx={cardStyle}>
+                <CardMedia component="img" image={Card1} title="Card 1" />
+                <CardContent>
+                  <Grid container spacing={1} alignItems="center">
+                    <Grid item>
+                      <Typography variant="subtitle1">Sunday Vibes</Typography>
+                    </Grid>
+                    <Grid item>
+                      <Typography variant="subtitle2">With supporting text below as a natural lead-in to additional content.</Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+                <CardActions>
+                  <Grid container>
+                    <Grid item>
+                      <Typography variant="subtitle1">Jan 1, 2025 | Kupondole</Typography>
+                    </Grid>
+                  </Grid>
+                </CardActions>
+              </Card>
+            </SubCard>
+          </Grid>
+          <Grid item xs={12}>
+            <UpcomingEvents />
           </Grid>
         </Grid>
       </Grid>
