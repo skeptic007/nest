@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 // project imports
 import useAuth from 'hooks/useAuth';
-import { DASHBOARD_PATH } from 'config';
+import { HOME_PATH } from 'config';
 import Loader from 'components/ui-component/Loader';
 
 // types
@@ -24,7 +24,7 @@ const GuestGuard = ({ children }: GuardProps) => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      router.push(DASHBOARD_PATH);
+      router.push(HOME_PATH);
     }
   }, [isLoggedIn, router]);
 

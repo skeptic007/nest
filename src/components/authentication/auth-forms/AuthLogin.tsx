@@ -53,7 +53,7 @@ const JWTLogin = ({ loginProp, ...others }: { loginProp?: number }) => {
   return (
     <Formik
       initialValues={{
-        email: 'info@codedthemesger.com',
+        email: 'info@codedthemes.com',
         password: '123456',
         submit: null
       }}
@@ -66,10 +66,9 @@ const JWTLogin = ({ loginProp, ...others }: { loginProp?: number }) => {
           await login(values.email, values.password);
           if (scriptedRef.current) {
             setStatus({ success: true });
-            router.push('/home');
+            router.push(HOME_PATH);
             setSubmitting(false);
           }
-          router.push('/home');
         } catch (err: any) {
           console.error(err);
           if (scriptedRef.current) {
