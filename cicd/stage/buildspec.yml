@@ -1,0 +1,25 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE: 082670687034.dkr.ecr.ap-southeast-2.amazonaws.com/ebspace-stage-webapp:latest
+
+phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 082670687034.dkr.ecr.ap-southeast-2.amazonaws.com
+      - aws ssm get-parameter --with-decryption --output text --query 'Parameter.Value' --name /ebspace/stage/webapp/env | base64 -d > apps/api/.env
+
+  build:
+    commands:
+      - docker build --cache-from $IMAGE -f apps/api/Dockerfile -t $IMAGE .
+
+  post_build:
+    commands:
+      - docker push $IMAGE
+      - mv cicd/stage/appspec.yml .
+
+artifacts:
+  files:
+    - 'cicd/**/*'
+    - appspec.yml

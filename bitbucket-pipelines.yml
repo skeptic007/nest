@@ -31,3 +31,54 @@ pipelines:
                 S3_BUCKET: 'ebspace-code-src/dev'
                 ZIP_FILE: 'ebspace-dev-webapp.zip'
                 VERSION_LABEL: 'ebspace-dev-webapp.zip'
+      - step:
+          name: '(Dev) Webapp-snyk'
+          runs-on:
+            - 'self.hosted'
+            - 'macos'
+            - 'ebpearls.snyk'
+          script:
+            - snyk code test > snyk-report.json || true
+          artifacts:
+            - snyk-report.json
+
+    stage:
+      - step:
+          name: '(Stage) Webapp'
+          runs-on: *base-runs-on
+          script:
+            - apt install zip
+            - mv cicd/stage/buildspec.yml .
+            - zip -r ebspace-stage-webapp.zip .
+            - <<: *base-code-deploy-pipe
+              variables:
+                <<: *base-code-deploy-vars
+                APPLICATION_NAME: 'ebspace-stage'
+                S3_BUCKET: 'ebspace-code-src/stage'
+                ZIP_FILE: 'ebspace-stage-webapp.zip'
+                VERSION_LABEL: 'ebspace-stage-webapp.zip'
+  tags:
+    "**":
+      - step:
+          name: Call ZOOM API on New Tag
+          runs-on:
+            - 'self.hosted'
+            - 'linux'
+            - 'ebspace'
+          script:
+            - chmod +x sendmessage
+            - ./sendmessage
+            
+  pull-requests:
+    '**':  # For triggering the pipeline for all PRs
+      - step:
+          name: Run Trivy Scan
+          runs-on:
+            - 'self.hosted'
+            - 'macos'
+            - 'trivyebspace'
+          script:
+            - trivy fs --scanners config,secret,vuln . --format template --template "@/Users/ebpearls/trivy-html-template/html.tpl" -o report.html
+          artifacts:
+            - report.html
+
