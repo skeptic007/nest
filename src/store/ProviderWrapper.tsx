@@ -23,33 +23,35 @@ import { ConfigProvider } from 'contexts/ConfigContext';
 
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
 
-// import client from '../../apollo.config';
-// import { ApolloProvider } from '@apollo/client';
+import client from '../../apollo.config';
+import { ApolloProvider } from '@apollo/client';
 import { SessionProvider } from 'next-auth/react';
 
 export default function ProviderWrapper({ children }: { children: ReactNode }) {
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persister}>
-        <ConfigProvider>
-          <ThemeCustomization>
-            <RTLLayout>
-              <Locales>
-                <NavigationScroll>
-                  <AuthProvider>
-                    <Notistack>
-                      <SessionProvider>
-                        <Snackbar />
-                        {children}
-                      </SessionProvider>
-                    </Notistack>
-                  </AuthProvider>
-                </NavigationScroll>
-              </Locales>
-            </RTLLayout>
-          </ThemeCustomization>
-        </ConfigProvider>
-      </PersistGate>
+      <ApolloProvider client={client}>
+        <PersistGate loading={null} persistor={persister}>
+          <ConfigProvider>
+            <ThemeCustomization>
+              <RTLLayout>
+                <Locales>
+                  <NavigationScroll>
+                    <AuthProvider>
+                      <Notistack>
+                        <SessionProvider>
+                          <Snackbar />
+                          {children}
+                        </SessionProvider>
+                      </Notistack>
+                    </AuthProvider>
+                  </NavigationScroll>
+                </Locales>
+              </RTLLayout>
+            </ThemeCustomization>
+          </ConfigProvider>
+        </PersistGate>
+      </ApolloProvider>
     </Provider>
   );
 }
