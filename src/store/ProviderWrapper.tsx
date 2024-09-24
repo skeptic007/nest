@@ -22,9 +22,10 @@ import { persister, store } from 'store';
 import { ConfigProvider } from 'contexts/ConfigContext';
 
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
-// import { FirebaseProvider as AuthProvider } from '../contexts/FirebaseContext';
-// import { Auth0Provider as AuthProvider } from '../contexts/Auth0Context';
-// import { AWSCognitoProvider as AuthProvider } from 'contexts/AWSCognitoContext';
+
+// import client from '../../apollo.config';
+// import { ApolloProvider } from '@apollo/client';
+import { SessionProvider } from 'next-auth/react';
 
 export default function ProviderWrapper({ children }: { children: ReactNode }) {
   return (
@@ -37,8 +38,10 @@ export default function ProviderWrapper({ children }: { children: ReactNode }) {
                 <NavigationScroll>
                   <AuthProvider>
                     <Notistack>
-                      <Snackbar />
-                      {children}
+                      <SessionProvider>
+                        <Snackbar />
+                        {children}
+                      </SessionProvider>
                     </Notistack>
                   </AuthProvider>
                 </NavigationScroll>
