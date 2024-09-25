@@ -34,7 +34,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 
 import { getSession, signOut } from 'next-auth/react';
 import { AuthenticationStatus, AuthStatusCode } from 'store/constant';
-// import { REFRESH_TOKEN } from 'graphql/auth';
+import { REFRESH_TOKEN } from 'graphql/auth';
 
 const httpLink = createHttpLink({
   // eslint-disable-next-line no-undef
@@ -56,7 +56,7 @@ const authLink = setContext((operation, { headers }) => {
   if (typeof window !== 'undefined') {
     // get the authentication token from local storage if it exists
     let token = returnTokenDependingOnOperation(operation);
-
+    console.log('token', token);
     // return the headers to the context so httpLink can read them
     return {
       headers: {

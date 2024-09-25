@@ -1,36 +1,12 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-
 import { LOGIN_MUTATION } from 'graphql/auth';
-// import { ISignInResponse } from 'types/api-response/auth';
 import client from '../apollo.config';
+import { ISignInResponseFormat } from 'types/api-response/auth';
 
 export interface ILoginCredential {
   email: string;
   password: string;
-}
-
-type UserStatus = 'email_verification_pending' | 'email_verified' | 'password_set' | 'password_set_pending';
-export interface IUserPops {
-  _id: string;
-  email: string;
-  status: UserStatus;
-  // address?: IAdressResponse;
-}
-export interface IToken {
-  accessToken: string;
-  accessTokenExpiresIn: Date;
-  refreshToken: string;
-  refreshTokenExpiresIn: Date;
-}
-export interface ISignInResponse {
-  message: string;
-  token: IToken;
-  user: IUserPops;
-  expiry: {
-    expiresAt: Date;
-    expiresBy: number;
-  };
 }
 
 export const authOptions: NextAuthOptions = {
@@ -38,22 +14,20 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt'
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true, // Enable debug
   providers: [
     CredentialsProvider({
       type: 'credentials',
-      credentials: {
-        email: { label: 'Email', type: 'text', placeholder: 'you@example.com' },
-        password: { label: 'Password', type: 'password' }
-      },
+      credentials: {},
       async authorize(credentials) {
-        console.log('here');
         if (!credentials) return null;
 
         const { email, password } = credentials as ILoginCredential;
 
         try {
-          const res = await client.mutate<{ loginWithEmailPassword: ISignInResponse }>({
+          console.log('email', email);
+          console.log('password', password);
+          // Call your GraphQL mutation
+          const res = await client.mutate({
             mutation: LOGIN_MUTATION,
             variables: {
               loginInput: {
@@ -62,48 +36,71 @@ export const authOptions: NextAuthOptions = {
               }
             }
           });
+          console.log('response===>', res);
 
-          if (res?.errors) {
+          if (res?.errors && res.errors.length > 0) {
+            console.error('GraphQL errors:', res.errors);
             throw new Error(res.errors[0].message);
           }
 
-          if (res?.data?.loginWithEmailPassword?.token) {
-            const data = res.data.loginWithEmailPassword;
-
+          if (res?.data?.login?.accessToken) {
+            const data = res.data.login;
             return {
-              id: data.user?._id || '',
+              id: data.user._id,
               user: data.user,
-              access_token: data.token.accessToken,
-              refresh_token: data.token.refreshToken,
-              expires_at: data.token.accessTokenExpiresIn,
+              access_token: data.accessToken,
+              refresh_token: data.refreshToken,
               emailVerified: data.user.status !== 'email_verification_pending'
             };
           }
 
           return null;
         } catch (error: any) {
-          throw new Error(error);
+          console.error('Error during authorization:', error);
+          throw new Error('Authorization failed');
         }
       }
     })
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
       if (user) {
+        const userDetail = user as ISignInResponseFormat;
         return {
-          access_token: user.access_token,
-          refresh_token: user.refresh_token,
-          expires_at: user.expires_at,
-          user: user.user
+          access_token: userDetail?.access_token,
+          refresh_token: userDetail?.refresh_token,
+          expires_at: userDetail?.expires_at,
+          expiry: userDetail?.expiry,
+          user: userDetail?.user
         };
+        //   token.access_token = user.access_token; // Assuming access_token is part of user object
+        //   token.refresh_token = user.refresh_token; // Assuming refresh_token is part of user object
       }
       return token;
     },
-    async session({ session, token }: any) {
-      session.user = token;
+    async session({ session, token }) {
+      session.user = token; // Add access token to session
+      // session.user.refresh_token = token.refresh_token; // Add refresh token to session
       return session;
     }
   },
+
+  // callbacks: {
+  //   async jwt({ token, user }) {
+  //     // if (user) {
+  //     //   token.access_token = user.access_token;
+  //     //   token.refresh_token = user.refresh_token;
+  //     //   token.user = user.user;
+  //     //   token.expires_at = user.expires_at;
+  //     // }
+  //     return token;
+  //   },
+  //   async session({ session, token }) {
+  //     // session.user = token.user;
+  //     // session.access_token = token.access_token;
+  //     return session;
+  //   }
+  // },
   pages: {
     signIn: '/login'
   }

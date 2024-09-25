@@ -37,12 +37,7 @@ export const LOGIN_MUTATION = gql`
         middleName
         permission
         phoneNumber
-        profile {
-          avatar
-          bio
-          favouritePosts
-          hobbies
-        }
+
         role
         status
         theme
@@ -59,7 +54,6 @@ export const LOGIN_MUTATION = gql`
 //     "password": ""
 //   }
 // }
-
 
 export const FORGOT_PASSWORD_MUTATION = gql`
   mutation forgotPassword($body: ForgotPasswordInput!) {
@@ -126,12 +120,8 @@ export const RESET_PASSWORD_MUTATION = gql`
 
 export const REFRESH_TOKEN_MUTATION = gql`
   mutation RefreshToken($refreshToken: String!) {
-    refresh(refreshToken: $refreshToken) {
+    refreshToken(refreshToken: $refreshToken) {
       accessToken
-      accessTokenExpiresIn
-      refreshToken
-      refreshTokenExpiresIn
     }
   }
 `;
-

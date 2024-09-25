@@ -27,7 +27,7 @@ import client from '../../apollo.config';
 import { ApolloProvider } from '@apollo/client';
 import { SessionProvider } from 'next-auth/react';
 
-export default function ProviderWrapper({ children }: { children: ReactNode }) {
+export default function ProviderWrapper({ children, session }: { children: ReactNode; session: any }) {
   return (
     <Provider store={store}>
       <ApolloProvider client={client}>
@@ -39,7 +39,7 @@ export default function ProviderWrapper({ children }: { children: ReactNode }) {
                   <NavigationScroll>
                     <AuthProvider>
                       <Notistack>
-                        <SessionProvider>
+                        <SessionProvider session={session}>
                           <Snackbar />
                           {children}
                         </SessionProvider>
