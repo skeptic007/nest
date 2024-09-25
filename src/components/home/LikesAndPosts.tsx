@@ -8,7 +8,6 @@ import RecentActorsTwoToneIcon from '@mui/icons-material/RecentActorsTwoTone';
 import { alpha, useTheme } from '@mui/material/styles';
 import MainCard from 'ui-component/cards/MainCard';
 
-
 const LikesAndPosts = () => {
   const theme = useTheme();
   const sideAvatarSX = {
