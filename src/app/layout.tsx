@@ -13,14 +13,14 @@ export const metadata: Metadata = {
 
 // ==============================|| ROOT LAYOUT ||============================== //
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children, session }: { children: React.ReactNode; session: string }) {
   return (
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body>
-        <ProviderWrapper>{children}</ProviderWrapper>
+        <ProviderWrapper session={session}>{children}</ProviderWrapper>
       </body>
     </html>
   );
