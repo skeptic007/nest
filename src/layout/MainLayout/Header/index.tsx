@@ -8,7 +8,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import useConfig from 'hooks/useConfig';
 import LogoSection from '../LogoSection';
 // import SearchSection from './SearchSection';
-// import MobileSection from './MobileSection';
+import MobileSection from './MobileSection';
 import ProfileSection from './ProfileSection';
 // import FullScreenSection from './FullScreenSection';
 // import LocalizationSection from './LocalizationSection';
@@ -79,7 +79,7 @@ const Header = () => {
       <ProfileSection />
 
       {/* mobile header */}
-      <Box sx={{ display: { xs: 'block', sm: 'none' } }}>{/* <MobileSection /> */}</Box>
+      <Box sx={{ display: { xs: 'block', sm: 'none' } }}><MobileSection /></Box>
     </>
   );
 };

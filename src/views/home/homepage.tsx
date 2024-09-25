@@ -13,10 +13,10 @@ import { getPosts, editComment, addComment, addReply, likePost, likeComment, lik
 import { PostDataType, Reply } from 'types/user-profile';
 
 import UpcomingEvents from 'components/home/UpcomingEvents';
-import CreatePost from 'components/home/CreatePost';
 import LikesAndPosts from 'components/home/LikesAndPosts';
 import PinnedEvents from 'components/home/PinnedEvents';
 import EventCalendar from 'components/home/EventCalendar';
+import CreatePostPopup from 'components/home/CreatePost';
 
 // ==============================|| SOCIAL PROFILE - POST ||============================== //
 
@@ -67,7 +67,7 @@ const HomePage = () => {
             <MainCard>
               <Grid container spacing={gridSpacing}>
                 <Grid item xs={12}>
-                  <CreatePost />
+                  <CreatePostPopup />
                 </Grid>
               </Grid>
             </MainCard>
