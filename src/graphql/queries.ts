@@ -11,3 +11,24 @@ export const GET_IMAGE_URL = gql`
     getImageUrl(imageUrlKey: $imageUrlKey)
   }
 `;
+
+export const GET_ME = gql`
+  query Me {
+    me {
+      _id
+      adminApproveStatus
+      countryCode
+      email
+      firstName
+      lastName
+      middleName
+      phoneNumber
+      profile {
+        avatar
+      }
+      role
+      status
+      theme
+    }
+  }
+`;

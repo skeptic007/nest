@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // material-ui
 import Grid from '@mui/material/Grid';
@@ -17,6 +17,8 @@ import LikesAndPosts from 'components/home/LikesAndPosts';
 import PinnedEvents from 'components/home/PinnedEvents';
 import EventCalendar from 'components/home/EventCalendar';
 import CreatePostPopup from 'components/home/CreatePost';
+import { useQuery } from '@apollo/client';
+import { GET_ME } from 'graphql/queries';
 
 // ==============================|| SOCIAL PROFILE - POST ||============================== //
 
@@ -58,6 +60,19 @@ const HomePage = () => {
   const handleReplayLikes = async (postId: string, commentId: string, replayId: string) => {
     dispatch(likeReply(postId, commentId, replayId));
   };
+
+  const { data, loading, error } = useQuery(GET_ME, { fetchPolicy: 'network-only' });
+  console.log('data============>', data);
+  useEffect(() => {
+    if (data) {
+      console.log('Me data:', data); // Logging the fetched data
+    }
+    if (error) {
+      console.error('Error fetching Me data:', error);
+    }
+  }, [data, error]);
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <Grid container spacing={gridSpacing}>
