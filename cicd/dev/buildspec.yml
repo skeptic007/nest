@@ -8,11 +8,11 @@ phases:
   pre_build:
     commands:
       - aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 082670687034.dkr.ecr.ap-southeast-2.amazonaws.com
-      - aws ssm get-parameter --with-decryption --output text --query 'Parameter.Value' --name /ebspace/dev/webapp/env | base64 -d > apps/api/.env
+      - aws ssm get-parameter --with-decryption --output text --query 'Parameter.Value' --name /ebspace/dev/webapp/env | base64 -d > .env
 
   build:
     commands:
-      - docker build --cache-from $IMAGE -f apps/api/Dockerfile -t $IMAGE .
+      - docker build --cache-from $IMAGE -f Dockerfile -t $IMAGE .
 
   post_build:
     commands:

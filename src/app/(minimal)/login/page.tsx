@@ -1,4 +1,4 @@
-import Login from 'views/authentication/auth3/login';
+import Login from 'views/authentication/auth1/login';
 
 // ==============================|| PAGE ||============================== //
 

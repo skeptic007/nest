@@ -17,6 +17,8 @@ import ImageUpload from 'components/icons/imageupload';
 import UserTag from 'components/icons/usertag';
 import { handleFileUpload } from 'utils/image-upload';
 import { CREATE_POST } from 'views/home/graphql';
+import { useDispatch } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
 
 // Mock user data
 const mockUsers = [
@@ -33,6 +35,7 @@ const ComposeDialog = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePath, setImagePath] = useState<string | null>(null); // Store the image path
   const [imageUploadStatus, setImageUploadStatus] = useState<'uploading' | 'success' | 'error' | null>(null);
+  const dispatch = useDispatch();
 
   const profile = {
     name: 'John Doe',
@@ -109,12 +112,41 @@ const ComposeDialog = () => {
           });
 
           console.log('Post created:', response);
-          handleCloseDialog();
+          if (response?.data?.createPost) {
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: response.data.createPost.message,
+                variant: 'alert',
+                anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+                alert: { color: 'success' }
+              })
+            );
+            handleCloseDialog();
+          }
         } else {
           console.error('Failed to upload image');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Failed to upload image',
+              variant: 'alert',
+              anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+              alert: { color: 'error' }
+            })
+          );
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error creating post:', error);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: error.message || 'Error creating post',
+            variant: 'alert',
+            anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+            alert: { color: 'error' }
+          })
+        );
       }
     }
   });

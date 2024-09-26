@@ -29,10 +29,10 @@ const UpcomingEvents = () => (
       <Grid container spacing={gridSpacing}>
         <Grid item xs={12}>
           <Grid container alignItems="center" spacing={2}>
-            <Grid item xs={12} md={12}>
+            <Grid item xs={12}>
               <CardMedia component="img" image={Dashboard1} title="image" sx={mediaSX} />
             </Grid>
-            <Grid item xs={12} md={12} zeroMinWidth>
+            <Grid item xs={12} zeroMinWidth>
               <Grid container spacing={1}>
                 <Grid item xs={12}>
                   <Typography variant="subtitle1">Event title goes here</Typography>

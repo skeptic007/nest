@@ -7,7 +7,7 @@ export const GET_PRESIGNED_URL = gql`
 `;
 
 export const GET_IMAGE_URL = gql`
-  query Query($imageUrlKey: ImageUrlKey!) {
+  query GetImageUrl($imageUrlKey: ImageUrlKey!) {
     getImageUrl(imageUrlKey: $imageUrlKey)
   }
 `;

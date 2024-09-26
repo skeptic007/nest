@@ -19,6 +19,7 @@ import EventCalendar from 'components/home/EventCalendar';
 import CreatePostPopup from 'components/home/CreatePost';
 import { useQuery } from '@apollo/client';
 import { GET_ME } from 'graphql/queries';
+import PostList from 'components/home/PostList';
 
 // ==============================|| SOCIAL PROFILE - POST ||============================== //
 
@@ -87,23 +88,7 @@ const HomePage = () => {
               </Grid>
             </MainCard>
           </Grid>
-          {posts &&
-            posts.map((post: PostDataType, index: number) => (
-              <Grid key={post.id} item xs={12}>
-                <Posts
-                  key={post.id}
-                  post={post}
-                  editPost={editPost}
-                  renderPost={getPost}
-                  setPosts={setPosts}
-                  commentAdd={commentAdd}
-                  replyAdd={replyAdd}
-                  handlePostLikes={handlePostLikes}
-                  handleCommentLikes={handleCommentLikes}
-                  handleReplayLikes={handleReplayLikes}
-                />
-              </Grid>
-            ))}
+          <PostList />
         </Grid>
       </Grid>
       <Grid item xs={12} sm={12} md={4}>

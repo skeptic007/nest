@@ -1,34 +1,80 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
-// project imports
-import useAuth from 'hooks/useAuth';
-import { useEffect } from 'react';
-import Loader from 'components/ui-component/Loader';
+import { Grid } from '@mui/material';
+import pageRoutes from 'constants/routes';
+import { UserAccountStatus } from 'constants/user';
+import { useSession } from 'next-auth/react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // types
 import { GuardProps } from 'types';
+import Loader from 'ui-component/Loader';
 
 // ==============================|| AUTH GUARD ||============================== //
 
 /**
+ * Function to set access and refresh tokens in local storage
+ * @param {string} accessToken
+ * @param {string} refreshToken
+ */
+const setTokens = (accessToken: string, refreshToken: string) => {
+  localStorage.setItem('accessToken', accessToken);
+  localStorage.setItem('refreshToken', refreshToken);
+};
+
+/**
  * Authentication guard for routes
- * @param {PropTypes.node} children children element/node
+ * @param {GuardProps} children children element/node
  */
 const AuthGuard = ({ children }: GuardProps) => {
-  const { isLoggedIn } = useAuth();
+  const { status, data } = useSession();
+  console.log('🚀 ~ AuthGuard ~ status:', status);
+  console.log('🚀 ~ AuthGuard ~ data:', data);
   const router = useRouter();
+  const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.push('/login');
-    }
-  }, [isLoggedIn, router]);
+    const handleAuthentication = () => {
+      if (status === 'authenticated') {
+        const payload = data?.user as any;
 
-  if (!isLoggedIn) return <Loader />;
+        // Check if the user is verified
+        if (payload?.user?.status === UserAccountStatus.email_verified || payload?.user?._id) {
+          setTokens(payload.access_token, payload.refresh_token);
 
-  return children;
+          // Redirect to dashboard if trying to access login/register pages
+          if (
+            pathname === pageRoutes.login ||
+            pathname === pageRoutes.register ||
+            pathname === pageRoutes.forgotPassword ||
+            pathname === pageRoutes.verifyRegistration ||
+            pathname === pageRoutes.verifyRegistrationPhone
+          ) {
+            router.replace(pageRoutes.dashboard);
+          }
+        }
+      } else if (status === 'unauthenticated') {
+        // Redirect to login if the user is unauthenticated
+        router.replace(pathname === '/register' ? pathname : pageRoutes.login);
+      }
+
+      // Stop loading after authentication handling
+      setIsLoading(false);
+    };
+
+    handleAuthentication();
+  }, [status, data, router, pathname]);
+
+  // Show loading spinner while checking authentication
+  return isLoading ? (
+    <Grid container justifyContent="center" alignItems="center" sx={{ height: '100vh' }}>
+      <Loader />
+    </Grid>
+  ) : (
+    children
+  );
 };
 
 export default AuthGuard;

@@ -1,30 +1,215 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
+// import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
+// import { setContext } from '@apollo/client/link/context';
 
-// HTTP link to define your GraphQL endpoint
-console.log('GraphQL Endpoint:', process.env.NEXT_USER_API_ENDPOINT);
+// // HTTP link to define your GraphQL endpoint
+// const httpLink = createHttpLink({
+//   uri: process.env.NEXT_USER_API_ENDPOINT,
+// });
+
+// // Auth link to include the token in the headers
+// const authLink = setContext((_, { headers }) => {
+//   const token = localStorage.getItem('accessToken');
+
+//   return {
+//     headers: {
+//       ...headers,
+//       authorization: token ? `Bearer ${token}` : '',
+//     },
+//   };
+// });
+
+// // Create Apollo Client instance
+// const client = new ApolloClient({
+//   link: authLink.concat(httpLink),
+//   cache: new InMemoryCache(),
+// });
+
+// export default client;
+
+import { ApolloClient, ApolloError, createHttpLink, InMemoryCache, Observable } from '@apollo/client';
+import { onError } from '@apollo/client/link/error';
+import { setContext } from '@apollo/client/link/context';
+import { store } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+
+import { getSession, signOut } from 'next-auth/react';
+import { AuthenticationStatus, AuthStatusCode } from 'store/constant';
+import { REFRESH_TOKEN } from 'graphql/auth';
 
 const httpLink = createHttpLink({
-  uri: process.env.NEXT_USER_API_ENDPOINT
+  // eslint-disable-next-line no-undef
+  // uri: process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://dev-api.ebspace.draftserver.com/user-api'
+  uri: 'http://localhost:8000/user-api'
+  // uri: 'https://1493-202-166-198-75.ngrok-free.app/api'
 });
 
-const hardcodedToken =
-  'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NmYyZTg4N2U4ZDRiMmI3NDQ0MzJmZTEiLCJ1dWlkIjoiZTlhNzZjZTMtMGJkNi00N2VhLWI0Y2ItODgwZDA4Mzk4MmNlIiwiaWF0IjoxNzI3MjgyMDg4LCJleHAiOjE3MjcyODU2ODh9.JATea8h4CT8qIxH6DMbSTp2eIXtdNEXqxzW78OvWhCA';
+function isRefreshRequest(operation) {
+  return operation.operationName === 'refreshToken';
+}
 
-// Auth link to include the token in the headers
-const authLink = setContext((_, { headers }) => {
+function returnTokenDependingOnOperation(operation) {
+  if (isRefreshRequest(operation)) return localStorage.getItem('refreshToken') || '';
+  return localStorage.getItem('accessToken') || '';
+}
+
+const authLink = setContext((operation, { headers }) => {
+  if (typeof window !== 'undefined') {
+    // get the authentication token from local storage if it exists
+    let token = returnTokenDependingOnOperation(operation);
+    console.log('token', token);
+    // return the headers to the context so httpLink can read them
+    return {
+      headers: {
+        ...headers,
+        authorization: token ? token : ''
+      }
+    };
+  }
+
   return {
     headers: {
-      ...headers,
-      authorization: hardcodedToken
+      ...headers
     }
   };
 });
 
-// Create Apollo Client instance
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
+const requestRefreshToken = async () => {
+  let refreshToken = localStorage.getItem('refreshToken');
+  try {
+    if (refreshToken) {
+      const { data } = await client.mutate({
+        mutation: REFRESH_TOKEN,
+        variables: {
+          refreshToken
+        }
+      });
+
+      const accessToken = data?.refresh?.accessToken;
+      refreshToken = data?.refresh?.refreshToken;
+
+      localStorage.setItem('accessToken', accessToken || '');
+      localStorage.setItem('refreshToken', refreshToken);
+
+      return accessToken;
+    }
+
+    return;
+  } catch (err) {
+    if (err instanceof ApolloError) {
+      if (err.graphQLErrors) {
+        err.graphQLErrors.forEach(async ({ extensions }) => {
+          const token = await getSession();
+          if (
+            extensions?.code === AuthenticationStatus.UNAUTHENTICATED ||
+            extensions?.response?.statusCode === AuthStatusCode.UNAUTHENTICATED
+          ) {
+            if (token) {
+              localStorage.clear();
+              signOut();
+            }
+          }
+        });
+      }
+    }
+  }
+};
+
+const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+  if (graphQLErrors) {
+    for (const err of graphQLErrors) {
+      switch (err.extensions.code) {
+        case 'UNAUTHENTICATED': {
+          // ignore 401 error for a refresh request
+          if (operation.operationName === 'refresh') {
+            return;
+          }
+          const observable = new Observable((observer) => {
+            // used an annonymous function for using an async function
+            (async () => {
+              try {
+                const accessToken = await requestRefreshToken();
+                if (!accessToken) {
+                  const token = await getSession();
+                  if (token) {
+                    localStorage.clear();
+                    return signOut();
+                  }
+                }
+                // Retry the failed request
+                const subscriber = {
+                  next: observer.next.bind(observer),
+                  error: observer.error.bind(observer),
+                  complete: observer.complete.bind(observer)
+                };
+
+                forward(operation).subscribe(subscriber);
+              } catch (error) {
+                observer.error(error);
+              }
+            })();
+          });
+
+          return observable;
+        }
+        case 'FORBIDDEN': {
+          // ignore 401 error for a refresh request
+          store.dispatch(
+            openSnackbar({
+              open: true,
+              message: err?.message || 'fallback message',
+              anchorOrigin: { horizontal: 'center', vertical: 'bottom' },
+              variant: 'alert',
+              alert: {
+                color: 'error'
+              },
+              timeout: 1000
+            })
+          );
+
+          break;
+        }
+      }
+    }
+  }
+
+  if (networkError) console.log(`[Network error]: ${networkError}`);
+});
+
+const authFlow = authLink.concat(errorLink);
+
+export const client = new ApolloClient({
+  link: authFlow.concat(httpLink),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Property: {
+        fields: {
+          address: {
+            merge(_, incoming) {
+              return incoming;
+            }
+          },
+          agentDetails: {
+            merge(_, incoming) {
+              return incoming;
+            }
+          }
+        }
+      },
+      Query: {
+        fields: {
+          getPropertyListForBuyer: {
+            merge: true
+          },
+          getPropertyListForMap: {
+            merge: true
+          },
+          getSimilarPropertyListForBuyer: {
+            merge: true
+          }
+        }
+      }
+    }
+  })
 });
 
 export default client;
