@@ -14,7 +14,7 @@ const Typography = (theme: Theme, borderRadius: number, fontFamily: FontFamily):
   h5: {
     fontSize: '0.875rem',
     color: theme.palette.mode === ThemeMode.DARK ? theme.palette.grey[600] : theme.palette.grey[900],
-    fontWeight: 500
+    fontWeight: 700
   },
   h4: {
     fontSize: '1rem',
@@ -54,7 +54,8 @@ const Typography = (theme: Theme, borderRadius: number, fontFamily: FontFamily):
   body1: {
     fontSize: '0.875rem',
     fontWeight: 400,
-    lineHeight: '1.334em'
+    lineHeight: '1.334em',
+    color: theme.palette.mode === ThemeMode.DARK ? theme.palette.grey[600] : theme.palette.grey[900]
   },
   body2: {
     letterSpacing: '0em',

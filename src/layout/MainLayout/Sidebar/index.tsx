@@ -51,7 +51,7 @@ const Sidebar = () => {
       <>
         {downMD ? (
           <Box sx={drawerSX}>
-            {/* <MenuList /> */}
+            <MenuList />
             {isVerticalOpen}
           </Box>
         ) : (
