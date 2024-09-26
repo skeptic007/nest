@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { Grid, CircularProgress } from '@mui/material';
 import PostView from './PostView'; // Your existing Post component

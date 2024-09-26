@@ -54,7 +54,8 @@ const Typography = (theme: Theme, borderRadius: number, fontFamily: FontFamily):
   body1: {
     fontSize: '0.875rem',
     fontWeight: 400,
-    lineHeight: '1.334em'
+    lineHeight: '1.334em',
+    color: theme.palette.mode === ThemeMode.DARK ? theme.palette.grey[600] : theme.palette.grey[900]
   },
   body2: {
     letterSpacing: '0em',

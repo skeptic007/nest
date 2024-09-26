@@ -1,19 +1,14 @@
 import * as React from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Avatar, Button, ButtonBase, CardMedia, Collapse, Grid, Menu, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Avatar, Button, ButtonBase, Card, CardMedia, Collapse, Grid, Menu, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { useMediaQuery } from '@mui/material';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useQuery } from '@apollo/client';
-
-// icons
-import ShareTwoToneIcon from '@mui/icons-material/ShareTwoTone';
+import { GET_IMAGE_URL } from 'graphql/queries';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import ThumbUpAltTwoToneIcon from '@mui/icons-material/ThumbUpAltTwoTone';
 import ChatBubbleTwoToneIcon from '@mui/icons-material/ChatBubbleTwoTone';
-import { GET_IMAGE_URL } from 'graphql/queries';
-
-// Define post type
 
 type PostViewProps = {
   post: any;
@@ -30,13 +25,12 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
 
   const { data, loading, error } = useQuery(GET_IMAGE_URL, {
     variables: { imageUrlKey: { key: post.image } },
-    skip: !post.image, // Skip query if no image is available
+    skip: !post.image
   });
 
   const imageUrl = data?.getImageUrl || '';
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) =>
-    setAnchorEl(event.currentTarget);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
   const handleChangeComment = () => setOpenComment((prev) => !prev);
 
@@ -44,33 +38,45 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
   const { handleSubmit, reset } = methods;
 
   const onSubmit = async (commentData: any) => {
-    // handle comment submission logic
     reset({ comment: '' });
+  };
+  const timeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    let interval = Math.floor(seconds / 31536000);
+    if (interval > 1) return `${interval} years ago`;
+    interval = Math.floor(seconds / 2592000);
+    if (interval > 1) return `${interval} months ago`;
+    interval = Math.floor(seconds / 86400);
+    if (interval > 1) return `${interval} days ago`;
+    interval = Math.floor(seconds / 3600);
+    if (interval > 1) return `${interval} hrs ago`;
+    interval = Math.floor(seconds / 60);
+    if (interval > 1) return `${interval} mins ago`;
+    return `${seconds} secs ago`;
   };
 
   if (loading) return <p>Loading image...</p>;
   if (error) return <p>Error loading image</p>;
 
   return (
-    <div style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '10px', marginBottom: '20px' }}>
-      <Grid container spacing={1}>
+    <Card sx={{ padding: '20px', borderRadius: '15px', boxShadow: 3, marginBottom: '20px' }}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Grid container wrap="nowrap" alignItems="center" spacing={1}>
+          <Grid container alignItems="center" spacing={2}>
             <Grid item>
               <Avatar alt={post.user.firstName} src={`${avatarImage}/${post.user._id}`} />
             </Grid>
             <Grid item xs>
-              <Typography variant="h5">
+              <Typography variant="h4" sx={{ fontWeight: 500 }}>
                 {post.user.firstName} {post.user.lastName}
-              </Typography>
-              <Typography variant="caption">
-                <FiberManualRecordIcon sx={{ width: '10px', height: '10px', opacity: 0.5, mx: 1 }} />
-                {new Date(post.createdAt).toLocaleString()}
               </Typography>
             </Grid>
             <Grid item>
+              <Typography variant="body2" color="textSecondary">
+                {timeAgo(new Date(post.createdAt))} {/* Use the timeAgo function here */}
+              </Typography>
               <ButtonBase onClick={handleClick}>
-                <Avatar variant="rounded">
+                <Avatar variant="rounded" sx={{ bgcolor: 'secondary.main', color: 'secondary.contrastText' }}>
                   <MoreVertTwoToneIcon />
                 </Avatar>
               </ButtonBase>
@@ -83,12 +89,14 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
         </Grid>
 
         <Grid item xs={12}>
-          <Typography variant="h6">{post.title}</Typography>
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            {post.title}
+          </Typography>
         </Grid>
 
         {imageUrl && (
           <Grid item xs={12}>
-            <CardMedia component="img" src={imageUrl} alt="post image" sx={{ borderRadius: '10px', maxHeight: 400 }} />
+            <CardMedia component="img" src={imageUrl} alt="post image" sx={{ borderRadius: '10px', maxHeight: 400, mb: 2 }} />
           </Grid>
         )}
 
@@ -122,12 +130,14 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
                   )}
                 />
               </FormProvider>
-              <Button type="submit">Add Comment</Button>
+              <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+                Add Comment
+              </Button>
             </form>
           </Grid>
         </Collapse>
       </Grid>
-    </div>
+    </Card>
   );
 };
 

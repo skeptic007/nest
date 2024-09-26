@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Button from '@mui/material/Button';
@@ -33,8 +33,7 @@ const ComposeDialog = () => {
   const [taggedUsers, setTaggedUsers] = useState([]); // To store tagged users
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePath, setImagePath] = useState<string | null>(null); // Store the image path
-  const [imageUploadStatus, setImageUploadStatus] = useState<'uploading' | 'success' | 'error' | null>(null);
+  const [isPostDisabled, setIsPostDisabled] = useState(true); // Track button disable state
   const dispatch = useDispatch();
 
   const profile = {
@@ -59,7 +58,6 @@ const ComposeDialog = () => {
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImageFile(null);
-    setImagePath(null);
   };
 
   const handleTagUserClick = () => setIsTagging(true);
@@ -80,64 +78,64 @@ const ComposeDialog = () => {
       content: ''
     },
     validationSchema: Yup.object({
-      content: Yup.string().required('Content is required')
+      content: Yup.string()
+        .transform((value) => (value || '').trim())
+        .max(1000, 'Content can’t exceed 1000 characters.')
+        .nullable()
     }),
-    onSubmit: async (values) => {
-      if (!imageFile) {
-        console.error('Image is required for the post');
-        return;
-      }
-
-      try {
-        // Upload image file when submitting the post
-        const path = await handleFileUpload(imageFile, {
-          setImageUploadStatus,
-          setImage: setImageFile,
-          setSnackbarMessage: (msg) => console.log(msg),
-          setSnackbarSeverity: () => {},
-          setSnackbarOpen: () => {}
-        });
-
-        if (path) {
-          // Send post data to the backend
-          const response = await createPost({
-            variables: {
-              createAdminPostInput: {
-                title: values.content,
-                image: path, // Use the uploaded image path
-                hashTags: [], // Empty for now
-                postTags: [] // Empty for now
-              }
-            }
+    onSubmit: async (values, { resetForm }) => {
+      let imagePath = null;
+      if (imageFile) {
+        try {
+          imagePath = await handleFileUpload(imageFile, {
+            setImageUploadStatus: () => {},
+            setImage: setImageFile,
+            setSnackbarMessage: (msg) => console.log(msg),
+            setSnackbarSeverity: () => {},
+            setSnackbarOpen: () => {}
           });
-
-          console.log('Post created:', response);
-          if (response?.data?.createPost) {
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: response.data.createPost.message,
-                variant: 'alert',
-                anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
-                alert: { color: 'success' }
-              })
-            );
-            handleCloseDialog();
-          }
-        } else {
-          console.error('Failed to upload image');
+        } catch (error) {
           dispatch(
             openSnackbar({
               open: true,
-              message: 'Failed to upload image',
+              message: 'Failed to upload image.',
               variant: 'alert',
               anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
               alert: { color: 'error' }
             })
           );
+          return;
+        }
+      }
+
+      try {
+        const response = await createPost({
+          variables: {
+            createAdminPostInput: {
+              title: values.content || null, // Set to null if no content
+              image: imagePath || null, // Set to null if no image
+              hashTags: [],
+              postTags: []
+            }
+          }
+        });
+
+        if (response?.data?.createPost) {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: response.data.createPost.message,
+              variant: 'alert',
+              anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+              alert: { color: 'success' }
+            })
+          );
+          resetForm();
+          setSelectedImage(null);
+          setImageFile(null);
+          handleCloseDialog();
         }
       } catch (error: any) {
-        console.error('Error creating post:', error);
         dispatch(
           openSnackbar({
             open: true,
@@ -150,6 +148,11 @@ const ComposeDialog = () => {
       }
     }
   });
+
+  // useEffect to enable/disable Post button
+  useEffect(() => {
+    setIsPostDisabled(!(formik.values.content.trim() || imageFile));
+  }, [formik.values.content, imageFile]);
 
   return (
     <>
@@ -166,7 +169,6 @@ const ComposeDialog = () => {
           {!isTagging ? (
             <form onSubmit={formik.handleSubmit}>
               <Grid container spacing={2}>
-                {/* Post title */}
                 <Grid item xs={12} display="flex" justifyContent="space-between">
                   <Typography variant="h5">Create Post</Typography>
                   <CloseIcon onClick={handleCloseDialog} />
@@ -178,7 +180,6 @@ const ComposeDialog = () => {
                   </Typography>
                 </Grid>
 
-                {/* Textarea for Content */}
                 <Grid item xs={12}>
                   <TextField
                     id="content-textarea"
@@ -188,18 +189,18 @@ const ComposeDialog = () => {
                     rows={5}
                     value={formik.values.content}
                     onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     name="content"
                     error={formik.touched.content && Boolean(formik.errors.content)}
                     helperText={formik.touched.content && formik.errors.content}
+                    inputProps={{ maxLength: 1000 }} // Limit content to 1000 characters
                   />
                 </Grid>
 
-                {/* Display Selected Image */}
                 {selectedImage && (
                   <Grid item xs={12} textAlign="center">
                     <Box position="relative" display="inline-block">
                       <Avatar variant="rounded" src={selectedImage} alt="Selected Image" sx={{ width: 130, height: 130, margin: 'auto' }} />
-                      //{' '}
                       <CloseIcon
                         onClick={handleRemoveImage}
                         sx={{
@@ -219,9 +220,7 @@ const ComposeDialog = () => {
                   </Grid>
                 )}
 
-                {/* Image Upload and Tag User */}
                 <Grid item xs={12} display="flex" justifyContent="space-between" alignItems="center">
-                  {/* Left side icons */}
                   <Box display="flex" alignItems="center">
                     <IconButton component="label">
                       <ImageUpload />
@@ -233,50 +232,36 @@ const ComposeDialog = () => {
                     </IconButton>
                   </Box>
 
-                  {/* Right side Post button */}
-                  <Button variant="contained" color="primary" type="submit" disabled={imageUploadStatus === 'uploading'}>
-                    {imageUploadStatus === 'uploading' ? 'Uploading...' : 'Post'}
+                  <Button variant="contained" color="primary" type="submit" disabled={isPostDisabled}>
+                    Post
                   </Button>
                 </Grid>
               </Grid>
             </form>
           ) : (
-            /* Tagging logic here */
-            <Grid container spacing={2}>
-              <Grid item xs={12} display="flex" justifyContent="space-between">
-                <IconButton onClick={handleBackToPost}>
-                  <ArrowBackIcon />
-                </IconButton>
-                <Typography variant="h6">Tag User</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField id="search-contact" placeholder="Search Contact" fullWidth variant="outlined" />
-              </Grid>
-              {/* Display Tagged Users */}
-              {taggedUsers.length > 0 && (
-                <Grid item xs={12}>
-                  {taggedUsers.map((user: any) => (
-                    <Box key={user.id} display="inline-flex" alignItems="center" sx={{ marginRight: 1 }}>
-                      <Avatar src={user.avatar} alt={user.name} sx={{ width: 30, height: 30 }} />
-                      <Typography sx={{ marginLeft: 1 }}>{user.name}</Typography>
-                      <IconButton onClick={() => handleUntagUser(user.id)} sx={{ marginLeft: 1 }}>
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  ))}
+            <>
+              <Grid container spacing={2}>
+                <Grid item xs={12} display="flex" justifyContent="space-between">
+                  <IconButton onClick={handleBackToPost}>
+                    <ArrowBackIcon />
+                  </IconButton>
+                  <Typography variant="h5">Tag People</Typography>
+                  <CloseIcon onClick={handleCloseDialog} />
                 </Grid>
-              )}
-              {/* Mock user list */}
-              {mockUsers.map((user) => (
-                <Grid item xs={12} key={user.id} display="flex" alignItems="center">
-                  <Avatar src={user.avatar} alt={user.name} />
-                  <Typography sx={{ marginLeft: 2 }}>{user.name}</Typography>
-                  <Button variant="outlined" sx={{ marginLeft: 'auto' }} onClick={() => handleTagUser(user)}>
-                    Tag
-                  </Button>
-                </Grid>
-              ))}
-            </Grid>
+
+                {mockUsers.map((user) => (
+                  <Grid key={user.id} item xs={12} display="flex" alignItems="center">
+                    <Avatar alt={user.name} src={user.avatar} sx={{ marginRight: 2 }} />
+                    <Typography variant="h6">{user.name}</Typography>
+                    {taggedUsers.includes(user) ? (
+                      <Button onClick={() => handleUntagUser(user.id)}>Untag</Button>
+                    ) : (
+                      <Button onClick={() => handleTagUser(user)}>Tag</Button>
+                    )}
+                  </Grid>
+                ))}
+              </Grid>
+            </>
           )}
         </DialogContent>
       </Dialog>
