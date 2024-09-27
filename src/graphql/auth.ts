@@ -81,6 +81,18 @@ export const LOGIN_MUTATION = gql`
 
 // }
 
+export const LOG_OUT = gql`
+  mutation Logout($logoutOfAllDevice: Boolean!, $refreshToken: String!) {
+    logout(logoutOfAllDevice: $logoutOfAllDevice, refreshToken: $refreshToken) {
+      message
+    }
+  }
+`;
+
+// {
+//   "logoutOfAllDevice": true,
+//   "refreshToken":
+// }
 export const REFRESH_TOKEN_MUTATION = gql`
   mutation RefreshToken($refreshToken: String!) {
     refreshToken(refreshToken: $refreshToken) {

@@ -13,8 +13,8 @@ import { LoadingButton } from '@mui/lab';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { signIn, useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation'; 
-import { Visibility, VisibilityOff } from '@mui/icons-material'; // Import visibility icons
+import { useRouter } from 'next/navigation';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 // Constants
 import { FORGOT_PASSWORD, INVALID_LOGIN_CREDENTIAL, SIGN_IN_NOW } from '../constants';
@@ -24,15 +24,16 @@ type AuthLoginProps = {
 };
 
 const JWTLogin = (props: AuthLoginProps) => {
-  const router = useRouter(); 
+  const router = useRouter();
   const theme = useTheme();
   const { status } = useSession();
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
-  const [snackbarOpen, setSnackbarOpen] = useState(false); // State for Snackbar visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/home'); 
+      router.replace('/home');
     }
   }, [status, router]);
 
@@ -69,20 +70,23 @@ const JWTLogin = (props: AuthLoginProps) => {
             const res = await signIn('credentials', {
               email: values.email,
               password: values.password,
-              redirect: false 
+              redirect: false
             });
 
             if (res?.ok && res?.status === 200) {
-              setSnackbarOpen(true); // Show Snackbar on successful login
+              setSnackbarMessage('Login successful!');
+              setSnackbarOpen(true);
               setTimeout(() => {
-                router.push('/home'); // Redirect after a brief delay
-              }, 2000); // Adjust delay as needed
+                router.push('/home');
+              }, 2000);
               return;
             } else {
-              alert(res?.error?.includes(':') ? res.error.split(':')[1] : INVALID_LOGIN_CREDENTIAL);
+              setSnackbarMessage(res?.error?.includes(':') ? res.error.split(':')[1] : INVALID_LOGIN_CREDENTIAL);
+              setSnackbarOpen(true);
             }
           } catch (error) {
-            alert(INVALID_LOGIN_CREDENTIAL);
+            setSnackbarMessage(INVALID_LOGIN_CREDENTIAL);
+            setSnackbarOpen(true);
           } finally {
             setSubmitting(false);
           }
@@ -101,6 +105,7 @@ const JWTLogin = (props: AuthLoginProps) => {
                     value={values.email}
                     onBlur={handleBlur}
                     onChange={handleChange}
+                    label="Email" // Accessibility improvement
                   />
                   {touched.email && errors.email && <FormHelperText error>{errors.email}</FormHelperText>}
                 </FormControl>
@@ -110,43 +115,34 @@ const JWTLogin = (props: AuthLoginProps) => {
                   <TextField
                     fullWidth
                     name="password"
-                    type={showPassword ? 'text' : 'password'} // Toggle password visibility
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Password"
                     value={values.password}
                     onBlur={handleBlur}
                     onChange={handleChange}
+                    label="Password" // Accessibility improvement
                     InputProps={{
                       endAdornment: (
                         <IconButton onClick={handleClickShowPassword} edge="end">
-                          {showPassword ? <Visibility /> : <VisibilityOff />} 
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
                         </IconButton>
-                      ),
+                      )
                     }}
                   />
                   {touched.password && errors.password && <FormHelperText error>{errors.password}</FormHelperText>}
                 </FormControl>
               </Grid>
-              <Grid item xs={12} textAlign="center"> {/* Centered links */}
+              <Grid item xs={12} textAlign="center">
                 <Typography
                   variant="body1"
                   fontWeight={500}
                   component={Link}
                   href={'/forgot-password'}
                   color="primary"
-                  sx={{ textDecoration: 'none', mr: 2 }} // Margin for spacing
+                  sx={{ textDecoration: 'none', mr: 2 }}
                 >
                   {FORGOT_PASSWORD}
                 </Typography>
-                {/* <Typography
-                  variant="body1"
-                  fontWeight={500}
-                  component={Link}
-                  href={'/register'}
-                  color="primary"
-                  sx={{ textDecoration: 'none' }} // Margin for spacing
-                >
-                  Don't have an account?
-                </Typography> */}
               </Grid>
             </Grid>
 
@@ -173,13 +169,7 @@ const JWTLogin = (props: AuthLoginProps) => {
         )}
       </Formik>
 
-      {/* Snackbar for login success */}
-      <Snackbar
-        open={snackbarOpen}
-        onClose={handleSnackbarClose}
-        message="Login successful!"
-        autoHideDuration={2000} // Adjust duration as needed
-      />
+      <Snackbar open={snackbarOpen} onClose={handleSnackbarClose} message={snackbarMessage} autoHideDuration={2000} />
     </>
   );
 };

@@ -9,30 +9,30 @@ export interface ILoginCredential {
   deviceId?: string;
 }
 
-async function refreshAccessToken(tokenObject: any) {
-  try {
-    const { data } = await client.mutate({
-      mutation: REFRESH_TOKEN_MUTATION,
-      variables: {
-        refreshToken: tokenObject.refresh_token
-      }
-    });
+// async function refreshAccessToken(tokenObject: any) {
+//   try {
+//     const { data } = await client.mutate({
+//       mutation: REFRESH_TOKEN_MUTATION,
+//       variables: {
+//         refreshToken: tokenObject.refresh_token
+//       }
+//     });
 
-    const refreshedTokens = data?.refreshToken;
+//     const refreshedTokens = data?.refreshToken;
 
-    return {
-      ...tokenObject,
-      access_token: refreshedTokens.accessToken,
-      refresh_token: refreshedTokens.refreshToken || tokenObject.refresh_token, // Use old refresh token if a new one isn't provided
-    };
-  } catch (error) {
-    console.error('Error refreshing access token:', error);
-    return {
-      ...tokenObject,
-      error: 'RefreshAccessTokenError'
-    };
-  }
-}
+//     return {
+//       ...tokenObject,
+//       access_token: refreshedTokens.accessToken,
+//       refresh_token: refreshedTokens.refreshToken || tokenObject.refresh_token // Use old refresh token if a new one isn't provided
+//     };
+//   } catch (error) {
+//     console.error('Error refreshing access token:', error);
+//     return {
+//       ...tokenObject,
+//       error: 'RefreshAccessTokenError'
+//     };
+//   }
+// }
 
 export const authOptions: NextAuthOptions = {
   session: {
