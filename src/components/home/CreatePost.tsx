@@ -188,7 +188,7 @@ const ComposeDialog = () => {
                 </Grid>
                 <Grid item xs={12} display="flex" alignItems="center">
                   <Avatar alt="User" src={userAvatarUrl} />
-                  <Typography variant="h6" sx={{ marginLeft: 2 }}>
+                  <Typography variant="h5" sx={{ marginLeft: 2 }}>
                     {user?.firstName} {user?.lastName}
                   </Typography>
                 </Grid>

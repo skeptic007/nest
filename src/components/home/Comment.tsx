@@ -2,14 +2,10 @@ import { Grid, Typography, ButtonBase, Menu, MenuItem, IconButton } from '@mui/m
 import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import { useState } from 'react';
 import Avatar from 'ui-component/extended/Avatar';
+import { GET_IMAGE_URL } from 'graphql/queries';
+import { useQuery } from '@apollo/client';
 
-type CommentProps = {
-  profileImage: string;
-  commenterName: string;
-  commentText: string;
-};
-
-const CommentView: React.FC<CommentProps> = ({ profileImage, commenterName, commentText }) => {
+const CommentView: React.FC<any> = ({ comment }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -20,6 +16,13 @@ const CommentView: React.FC<CommentProps> = ({ profileImage, commenterName, comm
     setAnchorEl(null);
   };
 
+  const { data } = useQuery(GET_IMAGE_URL, {
+    variables: { imageUrlKey: { key: comment.commentedBy.profile.avatar } },
+    skip: !comment.commentedBy.profile.avatar
+  });
+
+  const commenterImageUrl = data?.getImageUrl || '';
+
   return (
     <Grid
       container
@@ -28,13 +31,13 @@ const CommentView: React.FC<CommentProps> = ({ profileImage, commenterName, comm
       sx={{ marginBottom: '10px', padding: '10px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}
     >
       <Grid item>
-        <Avatar src={profileImage} alt={commenterName} />
+        <Avatar src={commenterImageUrl} alt={comment.commentedBy.firstName} />
       </Grid>
       <Grid item xs>
         <Grid container justifyContent="space-between" alignItems="center">
           <Grid item>
             <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
-              {commenterName}
+              {comment.commentedBy.firstName} {comment.commentedBy.lastName}
             </Typography>
           </Grid>
           <Grid item>
@@ -62,7 +65,7 @@ const CommentView: React.FC<CommentProps> = ({ profileImage, commenterName, comm
           </Grid>
         </Grid>
         <Typography variant="body2" sx={{ marginTop: '5px', color: 'textSecondary' }}>
-          {commentText}
+          {comment.content}
         </Typography>
       </Grid>
     </Grid>

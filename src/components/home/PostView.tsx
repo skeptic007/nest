@@ -33,24 +33,6 @@ type PostViewProps = {
   post: any;
 };
 
-const mockComments = [
-  {
-    profileImage: '/assets/images/users/avatar-1.png', // Placeholder image URL
-    commenterName: 'John Doe',
-    commentText: 'This is a great post!'
-  },
-  {
-    profileImage: '/assets/images/users/avatar-2.png',
-    commenterName: 'Jane Smith',
-    commentText: 'Really insightful, thanks for sharing.'
-  },
-  {
-    profileImage: '/assets/images/users/avatar-3.png',
-    commenterName: 'Emily Johnson',
-    commentText: 'I learned something new today!'
-  }
-];
-
 const PostView: React.FC<PostViewProps> = ({ post }) => {
   const theme = useTheme();
   const { mode } = useConfig();
@@ -258,13 +240,8 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
                 </FormProvider>
               </form>
               {/* <Grid item spacing={2} sx={{ marginTop: '20px' }}> */}
-              {mockComments.map((comment, index) => (
-                <CommentView
-                  key={index}
-                  profileImage={comment.profileImage}
-                  commenterName={comment.commenterName}
-                  commentText={comment.commentText}
-                />
+              {post.recentComments.map((comment: any) => (
+                <CommentView key={comment.id} comment={comment} />
               ))}
               {/* </Grid> */}
             </Grid>
