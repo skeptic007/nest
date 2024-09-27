@@ -57,6 +57,10 @@ export const LIST_ALL_POSTS = gql`
           status
           theme
           updatedAt
+          profile {
+            avatar
+            bio
+          }
         }
         recentComments {
           commentedBy {

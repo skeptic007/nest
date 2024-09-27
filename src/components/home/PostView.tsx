@@ -1,6 +1,20 @@
 import * as React from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Avatar, Button, ButtonBase, Card, CardMedia, Collapse, Grid, Menu, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import {
+  Avatar,
+  Button,
+  ButtonBase,
+  Card,
+  CardMedia,
+  CircularProgress,
+  Collapse,
+  Grid,
+  Menu,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography
+} from '@mui/material';
 import { useMediaQuery } from '@mui/material';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useQuery } from '@apollo/client';
@@ -118,7 +132,7 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
     return `${Math.floor(seconds)} sec${seconds > 1 ? 's' : ''} ago`;
   };
 
-  if (postImageLoading || avatarLoading) return <p>Loading images...</p>;
+  if (postImageLoading || avatarLoading) return <CircularProgress />;
   if (postImageError || avatarError) return <p>Error loading images</p>;
 
   return (

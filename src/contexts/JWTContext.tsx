@@ -41,7 +41,7 @@ const verifyToken: (st: string) => boolean = (serviceToken) => {
 const setSession = (serviceToken?: string | null) => {
   if (serviceToken) {
     localStorage.setItem('serviceToken', serviceToken);
-    axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
+    axios.defaults.headers.common.Authorization = ` ${serviceToken}`;
   } else {
     localStorage.removeItem('serviceToken');
     delete axios.defaults.headers.common.Authorization;

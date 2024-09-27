@@ -4,7 +4,7 @@ import { Grid, CircularProgress } from '@mui/material';
 import PostView from './PostView'; // Your existing Post component
 import { LIST_ALL_POSTS } from 'views/home/graphql';
 
-const LIMIT = 5;
+const LIMIT = 10;
 
 const PostList: React.FC = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -28,10 +28,11 @@ const PostList: React.FC = () => {
   // Handle fetching more posts when scrolling
   const handleScroll = useCallback(() => {
     if (
-      window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 500 &&
+      window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1000 &&
       !loadingMore &&
       hasNextPage
     ) {
+      console.log('handleScroll called===');
       setLoadingMore(true);
       fetchMore({
         variables: {

@@ -23,22 +23,26 @@ import AuthSlider from 'ui-component/cards/AuthSlider';
 import { AuthSliderProps } from 'types';
 
 // assets
-const AuthBlueCard = '/assets/images/auth/auth-blue-card.svg';
-const AuthPurpleCard = '/assets/images/auth/auth-purple-card.svg';
+const AuthBlueCard = '/assets/images/auth/image.svg';
+const AuthPurpleCard = '/assets/images/auth/image1.svg';
+const SampleSVG = '/assets/images/auth/image3.svg'; // Path to your SVG file
 
 // carousel items
 const items: AuthSliderProps[] = [
   {
-    title: 'Components Based Design System',
-    description: 'Powerful and easy to use multipurpose theme'
+    title: 'Welcome To EbSPace',
+    description: 'This is EbSpace Web Application',
+    image: SampleSVG // Add the SVG image here
   },
   {
-    title: 'Components Based Design System',
-    description: 'Powerful and easy to use multipurpose theme'
+    title: 'Customizable and Responsive',
+    description: 'Easily adjustable components for your needs',
+    image: AuthBlueCard // Existing images can still be used
   },
   {
-    title: 'Components Based Design System',
-    description: 'Powerful and easy to use multipurpose theme'
+    title: 'Modern Design Patterns',
+    description: 'Follow the latest trends in web design',
+    image: AuthPurpleCard // Existing images can still be used
   }
 ];
 
@@ -80,18 +84,30 @@ const Login = () => {
               <Grid item xs={12}>
                 <AuthLogin loginProp={1} />
               </Grid>
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
-              <Grid item xs={12}>
-                <Grid item container direction="column" alignItems="flex-end" xs={12}>
+
+              {/* Centered Forget Password Link */}
+              {/* <Grid item xs={12}>
+                <Grid container justifyContent="center">
                   <Typography
                     component={Link}
-                    href="/pages/authentication/auth1/register"
+                    href="/forgot-password"
                     variant="subtitle1"
                     sx={{ textDecoration: 'none' }}
                   >
-                    Don&apos;t have an account?
+                    Forgot Password?
+                  </Typography>
+                </Grid>
+              </Grid> */}
+
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+
+              {/* Centered Register Link below the login button */}
+              <Grid item xs={12}>
+                <Grid container justifyContent="center">
+                  <Typography component={Link} href="/register" variant="subtitle1" sx={{ textDecoration: 'none' }}>
+                    Don&apos;t have an account? Register
                   </Typography>
                 </Grid>
               </Grid>
@@ -138,7 +154,7 @@ const Login = () => {
               <Grid item xs={12}>
                 <Grid item container justifyContent="center" sx={{ pb: 8 }}>
                   <Grid item xs={10} lg={8} sx={{ '& .slick-list': { pb: 2 } }}>
-                    <AuthSlider items={items} />
+                    <AuthSlider items={items} /> {/* Pass updated items to AuthSlider */}
                   </Grid>
                 </Grid>
               </Grid>

@@ -28,10 +28,16 @@ const mockUsers = [
   { id: 3, name: 'John Smith', avatar: '/path-to-avatar3.png' }
 ];
 
+type UserType = {
+  id: number;
+  name: string;
+  avatar: string;
+};
+
 const ComposeDialog = () => {
   const [open, setOpen] = useState(false);
   const [isTagging, setIsTagging] = useState(false);
-  const [taggedUsers, setTaggedUsers] = useState([]); // To store tagged users
+  const [taggedUsers, setTaggedUsers] = useState<UserType[]>([]); // To store tagged users
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isPostDisabled, setIsPostDisabled] = useState(true); // Track button disable state

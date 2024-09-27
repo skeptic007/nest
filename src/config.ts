@@ -1,4 +1,3 @@
-// third party
 import { Roboto } from 'next/font/google';
 
 // types
