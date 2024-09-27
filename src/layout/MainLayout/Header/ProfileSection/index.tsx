@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-
+import { signOut } from 'next-auth/react';
+import { gql, useMutation } from '@apollo/client';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
@@ -15,6 +16,9 @@ import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 
 // third-party
 import { FormattedMessage } from 'react-intl';
@@ -32,6 +36,15 @@ import { ThemeMode } from 'types/config';
 import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react';
 import useConfig from 'hooks/useConfig';
 
+// GraphQL Logout Mutation
+const LOGOUT_MUTATION = gql`
+  mutation Logout($logoutOfAllDevice: Boolean!, $refreshToken: String!) {
+    logout(logoutOfAllDevice: $logoutOfAllDevice, refreshToken: $refreshToken) {
+      message
+    }
+  }
+`;
+
 const User1 = '/assets/images/users/user-round.svg';
 
 // ==============================|| PROFILE MENU ||============================== //
@@ -39,21 +52,60 @@ const User1 = '/assets/images/users/user-round.svg';
 const ProfileSection = () => {
   const theme = useTheme();
   const { borderRadius } = useConfig();
+  // const [isLoading, setIsLoading] = useState(false);
   // const navigate = useNavigate();
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const { logout, user } = useAuth();
+  // const { logout, user } = useAuth();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   /**
    * anchorRef is used on different components and specifying one type leads to other components throwing an error
    * */
   const anchorRef = useRef<any>(null);
-  const handleLogout = async () => {
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [logoutMutation] = useMutation(LOGOUT_MUTATION);
+  const refreshToken = localStorage.getItem('refreshToken');
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogoutClick = () => {
+    setOpenDialog(true); // Open the confirmation dialog
+  };
+
+  const handleConfirmLogout = async (logoutOfAllDevice: boolean) => {
+    setIsLoading(true);
     try {
-      await logout();
+      // Call GraphQL logout mutation
+      await logoutMutation({
+        variables: {
+          logoutOfAllDevice,
+          refreshToken
+        }
+      });
+
+      // Clear localStorage and call next-auth signOut
+      localStorage.clear();
+      await signOut({ callbackUrl: '/login' });
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
+      setOpenDialog(false); // Close the dialog after the operation
     }
   };
+
+  // const handleLogout = async () => {
+  //   try {
+  //     // await logout();
+  //     setIsLoading(true);
+  //     localStorage.clear();
+  //     await signOut({ callbackUrl: '/login' });
+  //   } catch (err) {
+  //     console.error(err);
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const handleClose = (event: React.MouseEvent<HTMLDivElement> | MouseEvent | TouchEvent) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
@@ -218,7 +270,11 @@ const ProfileSection = () => {
                               }
                             />
                           </ListItemButton>
-                          <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 4} onClick={handleLogout}>
+                          <ListItemButton
+                            sx={{ borderRadius: `${borderRadius}px` }}
+                            selected={selectedIndex === 4}
+                            onClick={handleLogoutClick}
+                          >
                             <ListItemIcon>
                               <IconLogout stroke={1.5} size="20px" />
                             </ListItemIcon>
@@ -240,6 +296,37 @@ const ProfileSection = () => {
           </ClickAwayListener>
         )}
       </Popper>
+
+      {/* Confirmation Dialog */}
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>
+          Logout
+          <IconButton
+            aria-label="close"
+            onClick={() => setOpenDialog(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500]
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>Do you want to logout from all devices or just this one?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => handleConfirmLogout(false)} color="primary" disabled={isLoading}>
+            Logout from this device
+          </Button>
+          <Button onClick={() => handleConfirmLogout(true)} color="secondary" disabled={isLoading}>
+            Logout from all devices
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

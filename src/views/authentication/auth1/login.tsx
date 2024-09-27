@@ -32,17 +32,17 @@ const items: AuthSliderProps[] = [
   {
     title: 'Welcome To EbSPace',
     description: 'This is EbSpace Web Application',
-    image: SampleSVG, // Add the SVG image here
+    image: SampleSVG // Add the SVG image here
   },
   {
     title: 'Customizable and Responsive',
     description: 'Easily adjustable components for your needs',
-    image: AuthBlueCard, // Existing images can still be used
+    image: AuthBlueCard // Existing images can still be used
   },
   {
     title: 'Modern Design Patterns',
     description: 'Follow the latest trends in web design',
-    image: AuthPurpleCard, // Existing images can still be used
+    image: AuthPurpleCard // Existing images can still be used
   }
 ];
 
@@ -106,13 +106,8 @@ const Login = () => {
               {/* Centered Register Link below the login button */}
               <Grid item xs={12}>
                 <Grid container justifyContent="center">
-                  <Typography
-                    component={Link}
-                    href="/register"
-                    variant="subtitle1"
-                    sx={{ textDecoration: 'none' }}
-                  >
-                    Don't have an account? Register
+                  <Typography component={Link} href="/register" variant="subtitle1" sx={{ textDecoration: 'none' }}>
+                    Don&apos;t have an account? Register
                   </Typography>
                 </Grid>
               </Grid>

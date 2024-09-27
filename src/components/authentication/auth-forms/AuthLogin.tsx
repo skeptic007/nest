@@ -15,13 +15,22 @@ import { Formik } from 'formik';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-
+import { gql, useMutation } from '@apollo/client';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 // Constants
 import { FORGOT_PASSWORD, INVALID_LOGIN_CREDENTIAL, SIGN_IN_NOW } from '../constants';
 
 type AuthLoginProps = {
   loginProp?: number;
 };
+
+const LOGOUT_MUTATION = gql`
+  mutation Logout($logoutOfAllDevice: Boolean!, $refreshToken: String!) {
+    logout(logoutOfAllDevice: $logoutOfAllDevice, refreshToken: $refreshToken) {
+      message
+    }
+  }
+`;
 
 const JWTLogin = (props: AuthLoginProps) => {
   const router = useRouter();
@@ -30,6 +39,11 @@ const JWTLogin = (props: AuthLoginProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [logoutMutation] = useMutation(LOGOUT_MUTATION);
+  const refreshToken = 'your-refresh-token'; // Replace with actual refresh token
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -43,6 +57,32 @@ const JWTLogin = (props: AuthLoginProps) => {
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
+  };
+
+  const handleLogoutClick = () => {
+    setOpenDialog(true); // Open the confirmation dialog
+  };
+
+  const handleConfirmLogout = async (logoutOfAllDevice: boolean) => {
+    setIsLoading(true);
+    try {
+      // Call GraphQL logout mutation
+      await logoutMutation({
+        variables: {
+          logoutOfAllDevice,
+          refreshToken
+        }
+      });
+
+      // Clear localStorage and call next-auth signOut
+      localStorage.clear();
+      await signOut({ callbackUrl: '/login' });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+      setOpenDialog(false); // Close the dialog after the operation
+    }
   };
 
   return (
