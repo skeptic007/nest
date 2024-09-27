@@ -21,17 +21,17 @@ type PostViewProps = {
 
 const mockComments = [
   {
-    profileImage: '/assets/images/users/avatar1', // Placeholder image URL
+    profileImage: '/assets/images/users/avatar-1.png', // Placeholder image URL
     commenterName: 'John Doe',
     commentText: 'This is a great post!'
   },
   {
-    profileImage: '/assets/images/users/avatar2',
+    profileImage: '/assets/images/users/avatar-2.png',
     commenterName: 'Jane Smith',
     commentText: 'Really insightful, thanks for sharing.'
   },
   {
-    profileImage: '/assets/images/users/avatar3',
+    profileImage: '/assets/images/users/avatar-3.png',
     commenterName: 'Emily Johnson',
     commentText: 'I learned something new today!'
   }
@@ -243,16 +243,16 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
                   </Stack>
                 </FormProvider>
               </form>
-              <Grid container spacing={2} sx={{ marginTop: '20px' }}>
-                {mockComments.map((comment, index) => (
-                  <CommentView
-                    key={index}
-                    profileImage={comment.profileImage}
-                    commenterName={comment.commenterName}
-                    commentText={comment.commentText}
-                  />
-                ))}
-              </Grid>
+              {/* <Grid item spacing={2} sx={{ marginTop: '20px' }}> */}
+              {mockComments.map((comment, index) => (
+                <CommentView
+                  key={index}
+                  profileImage={comment.profileImage}
+                  commenterName={comment.commenterName}
+                  commentText={comment.commentText}
+                />
+              ))}
+              {/* </Grid> */}
             </Grid>
           )}
         </Collapse>
