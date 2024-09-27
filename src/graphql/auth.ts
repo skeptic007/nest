@@ -30,37 +30,25 @@ export const LOGIN_MUTATION = gql`
       mfaEnabled
       user {
         _id
-
         adminApproveStatus
-
         email
-
         authProvider
-
         authProviderId
-
         countryCode
-
         createdAt
-
         firstName
-
         lastName
-
         mfaEnabled
-
         middleName
-
         permission
-
         phoneNumber
-
+        profile {
+          avatar
+          bio
+        }
         role
-
         status
-
         theme
-
         updatedAt
       }
     }
