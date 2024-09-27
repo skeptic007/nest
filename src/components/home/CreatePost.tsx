@@ -12,13 +12,14 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import ImageUpload from 'components/icons/imageupload';
 import UserTag from 'components/icons/usertag';
 import { handleFileUpload } from 'utils/image-upload';
 import { CREATE_POST } from 'views/home/graphql';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
+import { GET_IMAGE_URL, GET_ME } from 'graphql/queries';
 
 // Mock user data
 const mockUsers = [
@@ -36,10 +37,14 @@ const ComposeDialog = () => {
   const [isPostDisabled, setIsPostDisabled] = useState(true); // Track button disable state
   const dispatch = useDispatch();
 
-  const profile = {
-    name: 'John Doe',
-    avatar: 'assets/images/users/avatar-1.png'
-  };
+  const { data: meData } = useQuery(GET_ME, { fetchPolicy: 'network-only' });
+  const user = meData?.me;
+
+  const { data: userAvatarData } = useQuery(GET_IMAGE_URL, {
+    variables: { imageUrlKey: { key: user?.profile?.avatar } },
+    skip: !user?.profile?.avatar
+  });
+  const userAvatarUrl = userAvatarData?.getImageUrl || '';
 
   const [createPost] = useMutation(CREATE_POST);
 
@@ -171,12 +176,14 @@ const ComposeDialog = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} display="flex" justifyContent="space-between">
                   <Typography variant="h5">Create Post</Typography>
-                  <CloseIcon onClick={handleCloseDialog} />
+                  <IconButton>
+                    <CloseIcon onClick={handleCloseDialog} />
+                  </IconButton>
                 </Grid>
                 <Grid item xs={12} display="flex" alignItems="center">
-                  <Avatar alt="User" src={profile.avatar} />
+                  <Avatar alt="User" src={userAvatarUrl} />
                   <Typography variant="h6" sx={{ marginLeft: 2 }}>
-                    {profile.name}
+                    {user?.firstName} {user?.lastName}
                   </Typography>
                 </Grid>
 
@@ -254,9 +261,13 @@ const ComposeDialog = () => {
                     <Avatar alt={user.name} src={user.avatar} sx={{ marginRight: 2 }} />
                     <Typography variant="h6">{user.name}</Typography>
                     {taggedUsers.includes(user) ? (
-                      <Button onClick={() => handleUntagUser(user.id)}>Untag</Button>
+                      <Button color="secondary" onClick={() => handleUntagUser(user.id)}>
+                        Untag
+                      </Button>
                     ) : (
-                      <Button onClick={() => handleTagUser(user)}>Tag</Button>
+                      <Button color="secondary" onClick={() => handleTagUser(user)}>
+                        Tag
+                      </Button>
                     )}
                   </Grid>
                 ))}

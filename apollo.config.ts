@@ -36,12 +36,12 @@ import { getSession, signOut } from 'next-auth/react';
 import { AuthenticationStatus, AuthStatusCode } from 'store/constant';
 import { REFRESH_TOKEN } from 'graphql/auth';
 
-console.log('url', process.env.NEXT_USER_API_ENDPOINT);
+console.log('url', process.env.NEXT_PUBLIC_API_ENDPOINT);
 
 const httpLink = createHttpLink({
   // eslint-disable-next-line no-undef
-  uri: process.env.NEXT_PUBLIC_API_ENDPOINT
-  // uri: 'http://localhost:8000/user-api'
+  // uri: process.env.NEXT_PUBLIC_API_ENDPOINT
+  uri: 'http://localhost:8000/user-api'
   // uri: 'https://1493-202-166-198-75.ngrok-free.app/api'
 });
 
