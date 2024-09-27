@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { useRouter } from 'next/router';
-import { LOG_OUT } from 'graphql/auth';
+// import { useMutation } from '@apollo/client';
+// import { useRouter } from 'next/router';
+// import { LOG_OUT } from 'graphql/auth';
 // material-ui
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';

@@ -16,9 +16,8 @@ import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
 
 // third-party
 import { FormattedMessage } from 'react-intl';
@@ -52,34 +51,26 @@ const User1 = '/assets/images/users/user-round.svg';
 const ProfileSection = () => {
   const theme = useTheme();
   const { borderRadius } = useConfig();
-  // const [isLoading, setIsLoading] = useState(false);
-  // const navigate = useNavigate();
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  // const { logout, user } = useAuth();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  /**
-   * anchorRef is used on different components and specifying one type leads to other components throwing an error
-   * */
   const anchorRef = useRef<any>(null);
-
   const [openDialog, setOpenDialog] = useState(false);
   const [logoutMutation] = useMutation(LOGOUT_MUTATION);
   const refreshToken = localStorage.getItem('refreshToken');
-
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogoutClick = () => {
     setOpenDialog(true); // Open the confirmation dialog
   };
 
-  const handleConfirmLogout = async (logoutOfAllDevice: boolean) => {
+  const handleConfirmLogout = async () => {
     setIsLoading(true);
     try {
-      // Call GraphQL logout mutation
+      // Call GraphQL logout mutation with logoutOfAllDevice set to false
       await logoutMutation({
         variables: {
-          logoutOfAllDevice,
+          logoutOfAllDevice: false,
           refreshToken
         }
       });
@@ -95,34 +86,18 @@ const ProfileSection = () => {
     }
   };
 
-  // const handleLogout = async () => {
-  //   try {
-  //     // await logout();
-  //     setIsLoading(true);
-  //     localStorage.clear();
-  //     await signOut({ callbackUrl: '/login' });
-  //   } catch (err) {
-  //     console.error(err);
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const handleClose = (event: React.MouseEvent<HTMLDivElement> | MouseEvent | TouchEvent) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
       return;
     }
-
     setOpen(false);
   };
 
   const handleListItemClick = (event: React.MouseEvent<HTMLDivElement>, index: number, route: string = '') => {
     setSelectedIndex(index);
     handleClose(event);
-
-    // if (route && route !== '') {
-    //     navigate(route);
-    // }
   };
+
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
@@ -132,7 +107,6 @@ const ProfileSection = () => {
     if (prevOpen.current === true && open === false) {
       anchorRef.current.focus();
     }
-
     prevOpen.current = open;
   }, [open]);
 
@@ -298,32 +272,17 @@ const ProfileSection = () => {
       </Popper>
 
       {/* Confirmation Dialog */}
-
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>
-          Logout
-          <IconButton
-            aria-label="close"
-            onClick={() => setOpenDialog(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500]
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+        <DialogTitle>Confirm Logout</DialogTitle>
         <DialogContent>
-          <DialogContentText>Do you want to logout from all devices or just this one?</DialogContentText>
+          <Typography>Are you sure you want to logout?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleConfirmLogout(false)} color="primary" disabled={isLoading}>
-            Logout from this device
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Close
           </Button>
-          <Button onClick={() => handleConfirmLogout(true)} color="secondary" disabled={isLoading}>
-            Logout from all devices
+          <Button onClick={handleConfirmLogout} color="primary" disabled={isLoading}>
+            {isLoading ? 'Logging out...' : 'Confirm'}
           </Button>
         </DialogActions>
       </Dialog>
