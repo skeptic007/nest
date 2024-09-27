@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const LIST_ALL_POSTS = gql`
-  query Query($paginationParams: BasePaginationParams!) {
+  query ListHomePagePosts($paginationParams: BasePaginationParams!) {
     listHomePagePosts(paginationParams: $paginationParams) {
       data {
         _id
@@ -53,14 +53,40 @@ export const LIST_ALL_POSTS = gql`
           middleName
           permission
           phoneNumber
-          profile {
-            avatar
-            bio
-          }
           role
           status
           theme
           updatedAt
+          profile {
+            avatar
+            bio
+          }
+        }
+        recentComments {
+          commentedBy {
+            _id
+            adminApproveStatus
+            authProvider
+            authProviderId
+            countryCode
+            createdAt
+            email
+            firstName
+            lastName
+            mfaEnabled
+            middleName
+            permission
+            phoneNumber
+            role
+            status
+            theme
+            updatedAt
+            profile {
+              avatar
+              bio
+            }
+          }
+          content
         }
       }
       pagination {

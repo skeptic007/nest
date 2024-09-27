@@ -1,132 +1,95 @@
-// import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
-// import { setContext } from '@apollo/client/link/context';
-
-// // HTTP link to define your GraphQL endpoint
-// const httpLink = createHttpLink({
-//   uri: process.env.NEXT_USER_API_ENDPOINT,
-// });
-
-// // Auth link to include the token in the headers
-// const authLink = setContext((_, { headers }) => {
-//   const token = localStorage.getItem('accessToken');
-
-//   return {
-//     headers: {
-//       ...headers,
-//       authorization: token ? `Bearer ${token}` : '',
-//     },
-//   };
-// });
-
-// // Create Apollo Client instance
-// const client = new ApolloClient({
-//   link: authLink.concat(httpLink),
-//   cache: new InMemoryCache(),
-// });
-
-// export default client;
-
-import { ApolloClient, ApolloError, createHttpLink, InMemoryCache, Observable } from '@apollo/client';
+import { ApolloClient, ApolloError, createHttpLink, InMemoryCache, Observable, Operation } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { setContext } from '@apollo/client/link/context';
 import { store } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-
 import { getSession, signOut } from 'next-auth/react';
 import { AuthenticationStatus, AuthStatusCode } from 'store/constant';
-import { REFRESH_TOKEN } from 'graphql/auth';
+import { REFRESH_TOKEN_MUTATION } from 'graphql/auth';
 
-console.log('url', process.env.NEXT_USER_API_ENDPOINT);
+console.log('url', process.env.NEXT_PUBLIC_API_ENDPOINT);
 
 const httpLink = createHttpLink({
-  // eslint-disable-next-line no-undef
   uri: process.env.NEXT_PUBLIC_API_ENDPOINT
-  // uri: 'http://localhost:8000/user-api'
-  // uri: 'https://1493-202-166-198-75.ngrok-free.app/api'
 });
 
-function isRefreshRequest(operation) {
-  return operation.operationName === 'refreshToken';
-}
-
-function returnTokenDependingOnOperation(operation) {
-  if (isRefreshRequest(operation)) return localStorage.getItem('refreshToken') || '';
-  return localStorage.getItem('accessToken') || '';
-}
-
-const authLink = setContext((operation, { headers }) => {
-  if (typeof window !== 'undefined') {
-    // get the authentication token from local storage if it exists
-    let token = returnTokenDependingOnOperation(operation);
-    console.log('token', token);
-    // return the headers to the context so httpLink can read them
-    return {
-      headers: {
-        ...headers,
-        authorization: token ? token : ''
-      }
-    };
+// Type for operation
+const getToken = (operation: Operation): string => {
+  if (operation.operationName === 'refreshToken') {
+    return localStorage.getItem('refreshToken') || '';
   }
+  return localStorage.getItem('accessToken') || '';
+};
 
+// Type for the context setting function
+// @ts-ignore
+const authLink = setContext((operation: Operation, { headers }) => {
+  const token = typeof window !== 'undefined' ? getToken(operation) : '';
   return {
     headers: {
-      ...headers
+      ...headers,
+      authorization: token ? ` ${token}` : ''
     }
   };
 });
 
-const requestRefreshToken = async () => {
+// Async function with proper typing
+const requestRefreshToken = async (): Promise<string | undefined> => {
+  console.log('request refresh token called');
   let refreshToken = localStorage.getItem('refreshToken');
   try {
     if (refreshToken) {
       const { data } = await client.mutate({
-        mutation: REFRESH_TOKEN,
+        mutation: REFRESH_TOKEN_MUTATION,
         variables: {
           refreshToken
         }
       });
 
-      const accessToken = data?.refresh?.accessToken;
-      refreshToken = data?.refresh?.refreshToken;
+      const accessToken = data?.refreshToken?.accessToken;
+      console.log('accessToken===', accessToken);
 
       localStorage.setItem('accessToken', accessToken || '');
-      localStorage.setItem('refreshToken', refreshToken);
 
       return accessToken;
     }
 
-    return;
+    return undefined;
   } catch (err) {
     if (err instanceof ApolloError) {
       if (err.graphQLErrors) {
-        err.graphQLErrors.forEach(async ({ extensions }) => {
+        for (const { extensions } of err.graphQLErrors) {
           const token = await getSession();
           if (
             extensions?.code === AuthenticationStatus.UNAUTHENTICATED ||
+            // @ts-ignore
             extensions?.response?.statusCode === AuthStatusCode.UNAUTHENTICATED
           ) {
             if (token) {
+              console.log('inside if of line 64');
               localStorage.clear();
               signOut();
             }
           }
-        });
+        }
       }
     }
   }
 };
 
-const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+// Define the errorLink and properly type forward and observer
+//@ts-ignore
+const errorLink = onError(({ graphQLErrors, operation, forward }) => {
+  console.log('======graphqlError===', graphQLErrors);
   if (graphQLErrors) {
     for (const err of graphQLErrors) {
-      switch (err.extensions.code) {
+      switch (err?.extensions?.code) {
         case 'UNAUTHENTICATED': {
-          // ignore 401 error for a refresh request
-          if (operation.operationName === 'refresh') {
+          if (operation.operationName === 'refreshToken') {
             return;
           }
+
           const observable = new Observable((observer) => {
-            // used an annonymous function for using an async function
             (async () => {
               try {
                 const accessToken = await requestRefreshToken();
@@ -137,7 +100,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
                     return signOut();
                   }
                 }
-                // Retry the failed request
+
                 const subscriber = {
                   next: observer.next.bind(observer),
                   error: observer.error.bind(observer),
@@ -154,7 +117,6 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
           return observable;
         }
         case 'FORBIDDEN': {
-          // ignore 401 error for a refresh request
           store.dispatch(
             openSnackbar({
               open: true,
@@ -167,51 +129,17 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
               timeout: 1000
             })
           );
-
           break;
         }
       }
     }
   }
-
-  if (networkError) console.log(`[Network error]: ${networkError}`);
 });
 
-const authFlow = authLink.concat(errorLink);
-
-export const client = new ApolloClient({
-  link: authFlow.concat(httpLink),
-  cache: new InMemoryCache({
-    typePolicies: {
-      Property: {
-        fields: {
-          address: {
-            merge(_, incoming) {
-              return incoming;
-            }
-          },
-          agentDetails: {
-            merge(_, incoming) {
-              return incoming;
-            }
-          }
-        }
-      },
-      Query: {
-        fields: {
-          getPropertyListForBuyer: {
-            merge: true
-          },
-          getPropertyListForMap: {
-            merge: true
-          },
-          getSimilarPropertyListForBuyer: {
-            merge: true
-          }
-        }
-      }
-    }
-  })
+// Create Apollo Client instance
+const client = new ApolloClient({
+  link: errorLink.concat(authLink.concat(httpLink)),
+  cache: new InMemoryCache()
 });
 
 export default client;
