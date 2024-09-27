@@ -27,7 +27,7 @@ import client from '../../apollo.config';
 import { ApolloProvider } from '@apollo/client';
 import { SessionProvider } from 'next-auth/react';
 
-export default function ProviderWrapper({ children, session }: { children: ReactNode; session: any }) {
+export default function ProviderWrapper({ children, session }: { children: ReactNode; session?: any }) {
   return (
     <Provider store={store}>
       <ApolloProvider client={client}>
