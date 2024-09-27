@@ -5,7 +5,6 @@ import { onError } from '@apollo/client/link/error';
 import { setContext } from '@apollo/client/link/context';
 import { store } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-
 import { getSession, signOut } from 'next-auth/react';
 import { AuthenticationStatus, AuthStatusCode } from 'store/constant';
 import { REFRESH_TOKEN_MUTATION } from 'graphql/auth';
@@ -13,38 +12,22 @@ import { REFRESH_TOKEN_MUTATION } from 'graphql/auth';
 console.log('url', process.env.NEXT_PUBLIC_API_ENDPOINT);
 
 const httpLink = createHttpLink({
-  // eslint-disable-next-line no-undef
   uri: process.env.NEXT_PUBLIC_API_ENDPOINT
-  // uri: 'http://localhost:8000/user-api'
-  // uri: 'https://1493-202-166-198-75.ngrok-free.app/api'
 });
 
-function isRefreshRequest(operation) {
-  return operation.operationName === 'refreshToken';
-}
-
-function returnTokenDependingOnOperation(operation) {
-  if (isRefreshRequest(operation)) return localStorage.getItem('refreshToken') || '';
+const getToken = (operation) => {
+  if (operation.operationName === 'refreshToken') {
+    return localStorage.getItem('refreshToken') || '';
+  }
   return localStorage.getItem('accessToken') || '';
-}
+};
 
 const authLink = setContext((operation, { headers }) => {
-  if (typeof window !== 'undefined') {
-    // get the authentication token from local storage if it exists
-    let token = returnTokenDependingOnOperation(operation);
-    console.log('token', token);
-    // return the headers to the context so httpLink can read them
-    return {
-      headers: {
-        ...headers,
-        authorization: token ? token : ''
-      }
-    };
-  }
-
+  const token = typeof window !== 'undefined' ? getToken(operation) : '';
   return {
     headers: {
-      ...headers
+      ...headers,
+      authorization: token ? ` ${token}` : ''
     }
   };
 });
@@ -91,7 +74,7 @@ const authLink = setContext((operation, { headers }) => {
 // };
 
 const requestRefreshToken = async () => {
-  let refreshToken = localStorage.getItem('refreshToken');
+  const refreshToken = localStorage.getItem('refreshToken');
   try {
     if (!refreshToken) throw new Error('No refresh token available');
 
@@ -244,41 +227,10 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 //   if (networkError) console.log(`[Network error]: ${networkError}`);
 // });
 
-const authFlow = authLink.concat(errorLink);
-
-export const client = new ApolloClient({
-  link: authFlow.concat(httpLink),
-  cache: new InMemoryCache({
-    typePolicies: {
-      Property: {
-        fields: {
-          address: {
-            merge(_, incoming) {
-              return incoming;
-            }
-          },
-          agentDetails: {
-            merge(_, incoming) {
-              return incoming;
-            }
-          }
-        }
-      },
-      Query: {
-        fields: {
-          getPropertyListForBuyer: {
-            merge: true
-          },
-          getPropertyListForMap: {
-            merge: true
-          },
-          getSimilarPropertyListForBuyer: {
-            merge: true
-          }
-        }
-      }
-    }
-  })
+// Create Apollo Client instance
+const client = new ApolloClient({
+  link: errorLink.concat(authLink.concat(httpLink)),
+  cache: new InMemoryCache()
 });
 
 export default client;

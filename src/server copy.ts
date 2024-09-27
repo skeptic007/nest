@@ -62,7 +62,7 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (res?.errors) {
-            throw new Error(res?.errors[0].message);
+            throw new Error(res.errors[0].message);
           }
 
           const loginData = res?.data?.login;

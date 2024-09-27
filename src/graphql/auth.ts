@@ -94,6 +94,11 @@ export const REFRESH_TOKEN_MUTATION = gql`
 // "refreshToken":
 
 // }
+export const GET_IMAGE_URL = gql`
+  query Query($imageUrlKey: ImageUrlKey!) {
+    getImageUrl(imageUrlKey: $imageUrlKey)
+  }
+`;
 
 export const FORGOT_PASSWORD_MUTATION = gql`
   mutation forgotPassword($body: ForgotPasswordInput!) {
