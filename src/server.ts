@@ -64,6 +64,8 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
+      console.log('🚀 ~ jwt ~ user:', user);
+
       if (user) {
         const userDetail = user as ISignInResponseFormat;
         return {
@@ -85,22 +87,6 @@ export const authOptions: NextAuthOptions = {
     }
   },
 
-  // callbacks: {
-  //   async jwt({ token, user }) {
-  //     // if (user) {
-  //     //   token.access_token = user.access_token;
-  //     //   token.refresh_token = user.refresh_token;
-  //     //   token.user = user.user;
-  //     //   token.expires_at = user.expires_at;
-  //     // }
-  //     return token;
-  //   },
-  //   async session({ session, token }) {
-  //     // session.user = token.user;
-  //     // session.access_token = token.access_token;
-  //     return session;
-  //   }
-  // },
   pages: {
     signIn: '/login'
   }
