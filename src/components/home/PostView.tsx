@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Collapse,
   Grid,
+  IconButton,
   Menu,
   MenuItem,
   Stack,
@@ -17,8 +18,8 @@ import {
 } from '@mui/material';
 import { useMediaQuery } from '@mui/material';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import { useQuery } from '@apollo/client';
-import { GET_IMAGE_URL, GET_ME } from 'graphql/queries';
+import { useMutation, useQuery } from '@apollo/client';
+import { GET_ME } from 'graphql/queries';
 import MoreVertTwoToneIcon from '@mui/icons-material/MoreVertTwoTone';
 import useConfig from 'hooks/useConfig';
 import { ThemeMode } from 'types/config';
@@ -28,53 +29,92 @@ import CommentIcon from 'components/icons/comment';
 import ShareIcon from 'components/icons/share';
 import HeartIcon from 'components/icons/heart';
 import CommentView from './Comment';
+import { CREATE_COMMENT, GET_ALL_COMMENTS } from 'views/home/graphql';
+import useFetchImage from 'hooks/useFetchImage';
+import { timeAgo } from 'utils/timeAgo';
+import { useDispatch } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
+
+const fallbackProfile = '/assets/images/users/loadingprofile.jpg';
 
 type PostViewProps = {
   post: any;
+  refetchPosts: any;
 };
 
-const PostView: React.FC<PostViewProps> = ({ post }) => {
+const PostView: React.FC<PostViewProps> = ({ post, refetchPosts }) => {
   const theme = useTheme();
   const { mode } = useConfig();
   const isDarkMode = mode === ThemeMode.DARK;
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [openComment, setOpenComment] = React.useState(false);
+  const [allComments, setAllComments] = React.useState<any[]>([]);
+  const [showMoreComments, setShowMoreComments] = React.useState(false);
+  const dispatch = useDispatch();
 
-  const {
-    data: postImageData,
-    loading: postImageLoading,
-    error: postImageError
-  } = useQuery(GET_IMAGE_URL, {
-    variables: { imageUrlKey: { key: post.image } },
-    skip: !post.image
+  const { loading: loadingMoreComments, refetch: fetchMoreComments } = useQuery(GET_ALL_COMMENTS, {
+    variables: {
+      listCommentInput: {
+        id: post._id,
+        limit: 15,
+        skip: 0
+      }
+    },
+    skip: true, // We will trigger manually when needed
+    onCompleted: (data) => {
+      setAllComments(data.getAllComments.data);
+    }
   });
 
-  const postImageUrl = postImageData?.getImageUrl || '';
+  const handleViewMoreComments = async () => {
+    await fetchMoreComments();
+    setShowMoreComments(true);
+  };
 
-  // Fetch the profile avatar image
-  const {
-    data: avatarData,
-    loading: avatarLoading,
-    error: avatarError
-  } = useQuery(GET_IMAGE_URL, {
-    variables: { imageUrlKey: { key: post.user.profile.avatar } },
-    skip: !post.user.profile.avatar
+  const [createComment] = useMutation(CREATE_COMMENT, {
+    onCompleted: (data) => {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: data.createComment.message,
+          variant: 'alert',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+          alert: { color: 'success' }
+        })
+      );
+      refetchPosts(); // Optionally refetch comments
+    },
+    onError: (error: any) => {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to comment',
+          variant: 'alert',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+          alert: { color: 'error' }
+        })
+      );
+    }
   });
 
-  const avatarUrl = avatarData?.getImageUrl || '';
+  // Combine recent comments and fetched all comments (if "View More" is clicked)
+  const commentsToDisplay = showMoreComments ? allComments : post.recentComments;
+
+  // Fetch post image
+  const { imageUrl: postImageUrl, loading: postImageLoading, error: postImageError } = useFetchImage(post.image);
+
+  // Fetch post author's avatar
+  const { imageUrl: avatarUrl, loading: avatarLoading, error: avatarError } = useFetchImage(post.user.profile.avatar);
 
   // Fetch logged-in user information
   const { data: meData } = useQuery(GET_ME, { fetchPolicy: 'network-only' });
   const userData = meData?.me;
 
   const isPostOwner = userData?._id === post.user._id;
-  // Fetch the logged-in user's profile avatar image
-  const { data: userAvatarData } = useQuery(GET_IMAGE_URL, {
-    variables: { imageUrlKey: { key: userData?.profile?.avatar } },
-    skip: !userData?.profile?.avatar
-  });
-  const userAvatarUrl = userAvatarData?.getImageUrl || '';
+
+  // Fetch logged-in user's avatar
+  const { imageUrl: userAvatarUrl } = useFetchImage(userData?.profile?.avatar);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -84,36 +124,21 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
   const { handleSubmit, reset } = methods;
 
   const onSubmit = async (commentData: any) => {
-    reset({ comment: '' });
-  };
-
-  //to calculate time difference between current time and post created to show time ago
-  const timeAgo = (date: Date) => {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-
-    const intervalInYears = Math.floor(seconds / 31536000);
-    if (intervalInYears > 1) return `${intervalInYears} years ago`;
-
-    const intervalInMonths = Math.floor(seconds / 2592000);
-    if (intervalInMonths > 1) return `${intervalInMonths} months ago`;
-
-    const intervalInDays = Math.floor(seconds / 86400);
-    if (intervalInDays > 1) return `${intervalInDays} days ago`;
-
-    const intervalInHours = Math.floor(seconds / 3600);
-    const intervalInMinutes = Math.floor((seconds % 3600) / 60);
-
-    if (intervalInHours > 0 && intervalInMinutes > 0) {
-      return `${intervalInHours} hr${intervalInHours > 1 ? 's' : ''} and ${intervalInMinutes} min${intervalInMinutes > 1 ? 's' : ''} ago`;
-    } else if (intervalInHours > 0) {
-      return `${intervalInHours} hr${intervalInHours > 1 ? 's' : ''} ago`;
-    } else if (intervalInMinutes > 0) {
-      return `${intervalInMinutes} min${intervalInMinutes > 1 ? 's' : ''} ago`;
+    try {
+      await createComment({ variables: { createCommentInput: { postId: post._id, content: commentData.comment } } });
+      reset({ comment: '' });
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to comment',
+          variant: 'alert',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+          alert: { color: 'error' }
+        })
+      );
     }
-
-    return `${Math.floor(seconds)} sec${seconds > 1 ? 's' : ''} ago`;
   };
-
   if (postImageLoading || avatarLoading) return <CircularProgress />;
   if (postImageError || avatarError) return <p>Error loading images</p>;
 
@@ -123,7 +148,7 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
         <Grid item xs={12}>
           <Grid container alignItems="center" spacing={2}>
             <Grid item>
-              <Avatar alt={post.user.firstName} src={avatarUrl} />
+              <Avatar alt={post.user.firstName} src={avatarUrl || fallbackProfile} />
             </Grid>
             <Grid item xs>
               <Typography variant="h4" sx={{ fontWeight: 500 }}>
@@ -197,7 +222,9 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
               </Button>
               <Button variant="text" color="secondary" startIcon={<ShareIcon />} />
             </Stack>
-            <Button variant="text" color="secondary" startIcon={<HeartIcon />} />
+            <IconButton color="secondary">
+              <HeartIcon width={30} height={30} />
+            </IconButton>
           </Stack>
         </Grid>
 
@@ -207,7 +234,7 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
               <form onSubmit={handleSubmit(onSubmit)}>
                 <FormProvider {...methods}>
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <Avatar alt={post.user.firstName} src={userAvatarUrl} />
+                    <Avatar alt={post.user.firstName} src={userAvatarUrl || fallbackProfile} />
                     <Controller
                       name="comment"
                       control={methods.control}
@@ -239,14 +266,26 @@ const PostView: React.FC<PostViewProps> = ({ post }) => {
                   </Stack>
                 </FormProvider>
               </form>
-              {/* <Grid item spacing={2} sx={{ marginTop: '20px' }}> */}
-              {post.recentComments.map((comment: any) => (
-                <CommentView key={comment.id} comment={comment} />
-              ))}
-              {/* </Grid> */}
             </Grid>
           )}
         </Collapse>
+        {commentsToDisplay?.map((comment: any) => <CommentView key={comment.id} comment={comment} />)}
+
+        {post.commentCount > post.recentComments.length && !showMoreComments && (
+          <Grid item xs={12} sx={{ mt: 2, textAlign: 'center' }}>
+            <Button onClick={handleViewMoreComments} disabled={loadingMoreComments}>
+              {loadingMoreComments ? <CircularProgress size={24} /> : <Typography variant="body2">View More Comments</Typography>}
+            </Button>
+          </Grid>
+        )}
+
+        {showMoreComments && (
+          <Grid item xs={12} sx={{ mt: 2, textAlign: 'center' }}>
+            <Button onClick={() => setShowMoreComments(false)}>
+              <Typography variant="body2">View Less Comments</Typography>
+            </Button>
+          </Grid>
+        )}
       </Grid>
     </Card>
   );

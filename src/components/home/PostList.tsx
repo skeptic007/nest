@@ -16,7 +16,7 @@ const PostList: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
 
   // Initial Query to fetch the first set of posts
-  const { loading, error, fetchMore } = useQuery(LIST_ALL_POSTS, {
+  const { loading, error, fetchMore, refetch } = useQuery(LIST_ALL_POSTS, {
     variables: { paginationParams },
     onCompleted: (data) => {
       const newPosts = data?.listHomePagePosts?.data || [];
@@ -63,7 +63,7 @@ const PostList: React.FC = () => {
     <Grid container spacing={3}>
       {posts.map((post) => (
         <Grid key={post._id} item xs={12}>
-          <PostView post={post} />
+          <PostView post={post} refetchPosts={refetch} />
         </Grid>
       ))}
       {loadingMore && (
