@@ -136,3 +136,28 @@ export const GET_APP_USERS = gql`
     }
   }
 `;
+
+export const GET_ALL_COMMENTS = gql`
+  query GetAllComments($listCommentInput: ListCommentsInput!) {
+    getAllComments(listCommentInput: $listCommentInput) {
+      data {
+        _id
+        content
+        createdAt
+        postId
+        updatedAt
+        userDetails {
+          avatar
+          firstName
+          lastName
+          middleName
+        }
+        userId
+      }
+      pagination {
+        hasNextPage
+        total
+      }
+    }
+  }
+`;
