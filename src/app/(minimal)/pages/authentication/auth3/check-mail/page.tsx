@@ -1,10 +1,10 @@
-// PROJECT IMPORTS
-import CheckMail from 'views/authentication/auth3/check-mail';
+// // PROJECT IMPORTS
+// import CheckMail from 'views/authentication/auth3/check-mail';
 
-// ================================|| CHECK MAIL ||================================ //
+// // ================================|| CHECK MAIL ||================================ //
 
-const CheckMailPage = () => {
-  return <CheckMail />;
-};
+// const CheckMailPage = () => {
+//   return <CheckMail />;
+// };
 
-export default CheckMailPage;
+// export default CheckMailPage;

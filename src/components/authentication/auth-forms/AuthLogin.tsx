@@ -17,8 +17,8 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 // import { UserRole, EmailStatus } from '../../../store/slices/auth';
-import { useDispatch } from 'react-redux';
-import { setLoginState } from '../../../store/slices/auth';
+// import { useDispatch } from 'react-redux';
+// import { setLoginState } from '../../../store/slices/auth';
 // Constants
 import { FORGOT_PASSWORD, INVALID_LOGIN_CREDENTIAL, SIGN_IN_NOW } from '../constants';
 
@@ -30,7 +30,7 @@ type AuthLoginProps = {
 
 const JWTLogin = (props: AuthLoginProps) => {
   const router = useRouter();
-  const dispatch = useDispatch(); // Use dispatch to send user info to Redux
+
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -124,7 +124,6 @@ const JWTLogin = (props: AuthLoginProps) => {
 
               // If "Remember Me" is checked, store encrypted credentials
               if (rememberMe) {
-                
                 const encryptedEmail = CryptoJS.AES.encrypt(values.email, SECRET_KEY).toString();
                 const encryptedPassword = CryptoJS.AES.encrypt(values.password, SECRET_KEY).toString();
 
@@ -192,19 +191,23 @@ const JWTLogin = (props: AuthLoginProps) => {
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel control={<Checkbox checked={rememberMe} onChange={handleRememberMeChange} />} label="Remember me" />
-              </Grid>
-              <Grid item xs={12} textAlign="center">
-                <Typography
-                  variant="body1"
-                  fontWeight={500}
-                  component={Link}
-                  href={'/forgot-password'}
-                  color="primary"
-                  sx={{ textDecoration: 'none', mr: 2 }}
-                >
-                  {FORGOT_PASSWORD}
-                </Typography>
+                <Grid container justifyContent="space-between" alignItems="center">
+                  <Grid item>
+                    <FormControlLabel control={<Checkbox checked={rememberMe} onChange={handleRememberMeChange} />} label="Remember me" />
+                  </Grid>
+                  <Grid item>
+                    <Typography
+                      variant="body1"
+                      fontWeight={500}
+                      component={Link}
+                      href={'/forgot-password'}
+                      color="primary"
+                      sx={{ textDecoration: 'none' }}
+                    >
+                      {FORGOT_PASSWORD}
+                    </Typography>
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
 

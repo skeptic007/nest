@@ -10,7 +10,10 @@ import { REFRESH_TOKEN_MUTATION } from 'graphql/auth';
 console.log('url', process.env.NEXT_PUBLIC_API_ENDPOINT);
 
 const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_API_ENDPOINT
+  uri: process.env.NEXT_PUBLIC_API_ENDPOINT,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 // Type for operation

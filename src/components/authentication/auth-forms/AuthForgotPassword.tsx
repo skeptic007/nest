@@ -36,7 +36,14 @@ const AuthForgotPassword = ({ loginProp, ...others }: { loginProp?: number }) =>
         submit: null
       }}
       validationSchema={Yup.object().shape({
-        email: Yup.string().email('Must be a valid email').max(255).required('Email is required')
+        email: Yup.string()
+          .email('Must be a valid email')
+          .max(255)
+          .matches(
+            /^[a-zA-Z0-9._%+-]+@ebpearls\.com(\.au)?$/,
+            'Please enter an official email address ending with @ebpearls.com or @ebpearls.com.au'
+          )
+          .required('Email is required')
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
@@ -56,9 +63,7 @@ const AuthForgotPassword = ({ loginProp, ...others }: { loginProp?: number }) =>
                 })
               );
               setTimeout(() => {
-                window.location.replace(
-                  loginProp ? `/pages/authentication/auth${loginProp}/check-mail` : '/pages/authentication/auth3/check-mail'
-                );
+                window.location.replace(loginProp ? `/authentication/check-mail` : 'checkmail not found');
               }, 1500);
 
               // WARNING: do not set any formik state here as formik might be already destroyed here. You may get following error by doing so.
@@ -85,7 +90,7 @@ const AuthForgotPassword = ({ loginProp, ...others }: { loginProp?: number }) =>
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
         <form noValidate onSubmit={handleSubmit} {...others}>
           <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-            <InputLabel htmlFor="outlined-adornment-email-forgot">Email Address / Username</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-email-forgot">Email Address </InputLabel>
             <OutlinedInput
               id="outlined-adornment-email-forgot"
               type="email"
@@ -93,7 +98,7 @@ const AuthForgotPassword = ({ loginProp, ...others }: { loginProp?: number }) =>
               name="email"
               onBlur={handleBlur}
               onChange={handleChange}
-              label="Email Address / Username"
+              label="Email Address"
               inputProps={{}}
             />
             {touched.email && errors.email && (
@@ -111,8 +116,8 @@ const AuthForgotPassword = ({ loginProp, ...others }: { loginProp?: number }) =>
 
           <Box sx={{ mt: 2 }}>
             <AnimateButton>
-              <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
-                Send Mail
+              <Button disableElevation disabled={isSubmitting} size="large" type="submit" variant="contained">
+                Send
               </Button>
             </AnimateButton>
           </Box>
