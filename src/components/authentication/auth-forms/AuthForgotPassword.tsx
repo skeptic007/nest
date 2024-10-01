@@ -63,7 +63,9 @@ const AuthForgotPassword = ({ loginProp, ...others }: { loginProp?: number }) =>
                 })
               );
               setTimeout(() => {
-                window.location.replace(loginProp ? `/authentication/check-mail` : 'checkmail not found');
+                window.location.replace(
+                  loginProp ? `/pages/authentication/auth${loginProp}/check-mail` : '/pages/authentication/auth1/check-mail'
+                );
               }, 1500);
 
               // WARNING: do not set any formik state here as formik might be already destroyed here. You may get following error by doing so.

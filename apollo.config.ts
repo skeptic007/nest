@@ -7,12 +7,13 @@ import { getSession, signOut } from 'next-auth/react';
 import { AuthenticationStatus, AuthStatusCode } from 'store/constant';
 import { REFRESH_TOKEN_MUTATION } from 'graphql/auth';
 
-console.log('url', process.env.NEXT_PUBLIC_API_ENDPOINT);
+console.log('backend-url', process.env.NEXT_PUBLIC_API_ENDPOINT);
 
-const httpLink = createHttpLink({
+export const httpLink = createHttpLink({
   uri: process.env.NEXT_PUBLIC_API_ENDPOINT
 });
 
+console.log('🚀 ~ httpLink:', httpLink);
 // Type for operation
 const getToken = (operation: Operation): string => {
   if (operation.operationName === 'refreshToken') {
@@ -136,9 +137,11 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
   }
 });
 
+const authFlow = authLink.concat(errorLink);
 // Create Apollo Client instance
 const client = new ApolloClient({
-  link: errorLink.concat(authLink.concat(httpLink)),
+  // link: errorLink.concat(authLink.concat(httpLink)),
+  link: authFlow.concat(httpLink),
   cache: new InMemoryCache()
 });
 

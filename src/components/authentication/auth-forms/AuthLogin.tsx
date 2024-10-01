@@ -21,6 +21,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 // import { setLoginState } from '../../../store/slices/auth';
 // Constants
 import { FORGOT_PASSWORD, INVALID_LOGIN_CREDENTIAL, SIGN_IN_NOW } from '../constants';
+import { httpLink } from '../../../../apollo.config';
 
 const SECRET_KEY: string = process.env.NEXT_PUBLIC_SECRET_KEY || 'default_secret_key';
 
@@ -87,11 +88,12 @@ const JWTLogin = (props: AuthLoginProps) => {
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
           try {
-            let res = await signIn('credentials', {
+            console.log(httpLink, 'httpLink');
+            let res = await signIn('email-login', {
               email: values.email,
               password: values.password,
               redirect: false,
-              callbackUrl: '/home'
+              // callbackUrl: '/home'
             });
             console.log('response===>', res);
             if (res?.ok && res?.status === 200) {
