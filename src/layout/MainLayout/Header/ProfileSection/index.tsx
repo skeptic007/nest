@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { signOut } from 'next-auth/react';
-import { gql, useMutation } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
+import { useSession } from 'next-auth/react';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
@@ -16,6 +17,7 @@ import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { GET_IMAGE_URL } from '../../../../graphql/auth';
 
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
 
@@ -49,25 +51,52 @@ const User1 = '/assets/images/users/user-round.svg';
 // ==============================|| PROFILE MENU ||============================== //
 
 const ProfileSection = () => {
+  const { data: session } = useSession();
+  console.log('🚀 ~ ProfileSection ~ data:', session);
   const theme = useTheme();
   const { borderRadius } = useConfig();
-  const [selectedIndex, setSelectedIndex] = useState(-1);
   const { user } = useAuth();
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [open, setOpen] = useState(false);
-  const anchorRef = useRef<any>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [logoutMutation] = useMutation(LOGOUT_MUTATION);
-  const refreshToken = localStorage.getItem('refreshToken');
   const [isLoading, setIsLoading] = useState(false);
+  // TODO later
+
+  const anchorRef = useRef<any>(null);
+
+  const refreshToken = localStorage.getItem('refreshToken');
+
+  const [logoutMutation] = useMutation(LOGOUT_MUTATION);
+  // @ts-ignore
+  const avatarKey = session?.user?.user?.profile?.avatar || '';
+
+  const {
+    data: imageData,
+    loading: imageLoading,
+    error: imageError
+  } = useQuery(GET_IMAGE_URL, {
+    variables: { imageUrlKey: { key: avatarKey } }
+  });
+
+  const userAvatar = imageData?.getImageUrl || User1; // Fallback to default image
+
+  useEffect(() => {
+    if (imageLoading) {
+      console.log('Loading avatar image...');
+    }
+
+    if (imageError) {
+      console.error('Error fetching avatar image:', imageError);
+    }
+  }, [imageLoading, imageError]);
 
   const handleLogoutClick = () => {
-    setOpenDialog(true); // Open the confirmation dialog
+    setOpenDialog(true);
   };
 
   const handleConfirmLogout = async () => {
     setIsLoading(true);
     try {
-      // Call GraphQL logout mutation with logoutOfAllDevice set to false
       await logoutMutation({
         variables: {
           logoutOfAllDevice: false,
@@ -137,7 +166,7 @@ const ProfileSection = () => {
         }}
         icon={
           <Avatar
-            src={User1}
+            src={userAvatar ?? User1}
             sx={{
               ...theme.typography.mediumAvatar,
               margin: '8px 0 8px 8px !important',

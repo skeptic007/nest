@@ -95,18 +95,14 @@ const JWTLogin = (props: AuthLoginProps) => {
             });
             console.log('response===>', res);
             if (res?.ok && res?.status === 200) {
+              console.log('🚀 ~ onSubmit={ ~ res:', res);
               if (rememberMe) {
                 const encryptedEmail = CryptoJS.AES.encrypt(values.email, SECRET_KEY).toString();
                 localStorage.setItem('email', encryptedEmail);
               } else {
                 localStorage.removeItem('email');
               }
-              console.log('🚀 ~ onSubmit={ ~ res:', res);
-              // res = await signIn('credentials', {
-              //   email: values.email,
-              //   password: values.password,
-              //   callbackUrl: '/home'
-              // });
+
               setSnackbarMessage('Login successful!');
               // const { user } = res.data.login;
               setSnackbarOpen(true);
@@ -128,6 +124,7 @@ const JWTLogin = (props: AuthLoginProps) => {
 
               // If "Remember Me" is checked, store encrypted credentials
               if (rememberMe) {
+                
                 const encryptedEmail = CryptoJS.AES.encrypt(values.email, SECRET_KEY).toString();
                 const encryptedPassword = CryptoJS.AES.encrypt(values.password, SECRET_KEY).toString();
 
