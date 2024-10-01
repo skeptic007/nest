@@ -76,7 +76,10 @@ const ProfileSection = () => {
       });
 
       // Clear localStorage and call next-auth signOut
+      const email = localStorage.getItem('email');
+
       localStorage.clear();
+      localStorage.setItem('email', email as string);
       await signOut({ callbackUrl: '/login' });
     } catch (err) {
       console.error(err);

@@ -68,6 +68,7 @@ const requestRefreshToken = async (): Promise<string | undefined> => {
             if (token) {
               console.log('inside if of line 64');
               localStorage.clear();
+
               signOut();
             }
           }
