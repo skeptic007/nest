@@ -1,6 +1,6 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { LOG_OUT, LOGIN_MUTATION } from 'graphql/auth';
+import { LOGIN_MUTATION } from 'graphql/auth';
 import client, { httpLink } from '../apollo.config';
 import { ISignInResponseFormat } from 'types/api-response/auth';
 
