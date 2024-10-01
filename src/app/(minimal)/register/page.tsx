@@ -1,4 +1,4 @@
-import Register from 'views/authentication/auth3/register';
+import Register from 'views/authentication/auth1/register';
 
 // ==============================|| PAGE ||============================== //
 
