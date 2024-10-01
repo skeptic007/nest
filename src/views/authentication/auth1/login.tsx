@@ -60,12 +60,20 @@ const Login = () => {
               <Grid item xs={12}>
                 <Grid
                   container
-                  direction={{ xs: 'column-reverse', md: 'row' }}
-                  alignItems={{ xs: 'center', md: 'inherit' }}
-                  justifyContent={{ xs: 'center', md: 'space-between' }}
+                  direction={{ xs: 'column', md: 'column' }} // Keep it as a column for all sizes
+                  alignItems="center" // Center items vertically
+                  justifyContent="center" // Center items horizontally
                 >
+                  {/* Logo Section */}
                   <Grid item>
-                    <Stack justifyContent={{ xs: 'center', md: 'flex-start' }} textAlign={{ xs: 'center', md: 'inherit' }}>
+                    <Link href="#" aria-label="theme-logo">
+                      <Logo />
+                    </Link>
+                  </Grid>
+
+                  {/* Welcome Text Section */}
+                  <Grid item>
+                    <Stack justifyContent="center" textAlign="center">
                       <Typography color="secondary.main" gutterBottom variant={downMD ? 'h3' : 'h2'}>
                         Hi, Welcome Back
                       </Typography>
@@ -74,36 +82,16 @@ const Login = () => {
                       </Typography>
                     </Stack>
                   </Grid>
-                  <Grid item sx={{ mb: { xs: 3, sm: 0 } }}>
-                    <Link href="#" aria-label="theme-logo">
-                      <Logo />
-                    </Link>
-                  </Grid>
                 </Grid>
               </Grid>
               <Grid item xs={12}>
                 <AuthLogin loginProp={1} />
               </Grid>
 
-              {/* Centered Forget Password Link */}
-              {/* <Grid item xs={12}>
-                <Grid container justifyContent="center">
-                  <Typography
-                    component={Link}
-                    href="/forgot-password"
-                    variant="subtitle1"
-                    sx={{ textDecoration: 'none' }}
-                  >
-                    Forgot Password?
-                  </Typography>
-                </Grid>
-              </Grid> */}
-
               <Grid item xs={12}>
                 <Divider />
               </Grid>
 
-              {/* Centered Register Link below the login button */}
               <Grid item xs={12}>
                 <Grid container justifyContent="center">
                   <Typography component={Link} href="/register" variant="subtitle1" sx={{ textDecoration: 'none' }}>

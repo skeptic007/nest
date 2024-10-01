@@ -100,6 +100,12 @@ export const GET_IMAGE_URL = gql`
   }
 `;
 
+
+// {
+//   "imageUrlKey": {
+//     "key": ""
+//   }
+// }
 export const FORGOT_PASSWORD_MUTATION = gql`
   mutation forgotPassword($body: ForgotPasswordInput!) {
     forgotPassword(body: $body) {

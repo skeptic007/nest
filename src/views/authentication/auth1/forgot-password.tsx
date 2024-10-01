@@ -59,23 +59,37 @@ const ForgotPassword = () => {
                   alignItems={{ xs: 'center', md: 'inherit' }}
                   justifyContent={{ xs: 'center', md: 'space-between' }}
                 >
-                  <Grid item>
-                    <Stack justifyContent={{ xs: 'center', md: 'flex-start' }} textAlign={{ xs: 'center', md: 'inherit' }}>
-                      <Typography color="secondary.main" gutterBottom variant={downMD ? 'h3' : 'h2'}>
-                        Forgot password?
-                      </Typography>
-                      <Typography color="textPrimary" gutterBottom variant="h4">
-                        Enter credentials to continue
-                      </Typography>
-                    </Stack>
-                  </Grid>
-                  <Grid item sx={{ mb: { xs: 3, sm: 0 } }}>
-                    <Link href="#" aria-label="theme-logo">
-                      <Logo />
-                    </Link>
+                  <Grid item xs={12}>
+                    <Grid
+                      container
+                      direction="column" // Stack logo and text vertically
+                      alignItems="center" // Center items horizontally
+                      justifyContent="center" // Center items vertically
+                      textAlign="center" // Center text
+                    >
+                      {/* Logo Section */}
+                      <Grid item>
+                        <Link href="#" aria-label="theme-logo">
+                          <Logo />
+                        </Link>
+                      </Grid>
+
+                      {/* Welcome Text Section */}
+                      <Grid item>
+                        <Stack justifyContent="center">
+                          <Typography color="secondary.main" gutterBottom variant={downMD ? 'h3' : 'h2'}>
+                            Forgot password?
+                          </Typography>
+                          <Typography color="textPrimary" gutterBottom variant="h4">
+                            Enter credentials to continue
+                          </Typography>
+                        </Stack>
+                      </Grid>
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
+
               <Grid item xs={12}>
                 <Stack direction="row" justifyContent={{ xs: 'center', md: 'flex-start' }}>
                   <Typography variant="caption" fontSize="16px" textAlign={{ xs: 'center', md: 'inherit' }}>
@@ -83,12 +97,15 @@ const ForgotPassword = () => {
                   </Typography>
                 </Stack>
               </Grid>
+
               <Grid item xs={12}>
                 <AuthForgotPassword />
               </Grid>
+
               <Grid item xs={12}>
                 <Divider />
               </Grid>
+
               <Grid item xs={12}>
                 <Grid item container direction="column" alignItems="flex-end" xs={12}>
                   <Typography component={Link} href="/pages/authentication/auth1/login" variant="subtitle1" sx={{ textDecoration: 'none' }}>
