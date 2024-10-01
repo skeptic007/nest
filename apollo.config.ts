@@ -10,10 +10,7 @@ import { REFRESH_TOKEN_MUTATION } from 'graphql/auth';
 console.log('url', process.env.NEXT_PUBLIC_API_ENDPOINT);
 
 const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_API_ENDPOINT,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  uri: process.env.NEXT_PUBLIC_API_ENDPOINT
 });
 
 // Type for operation
@@ -24,7 +21,6 @@ const getToken = (operation: Operation): string => {
   return localStorage.getItem('accessToken') || '';
 };
 
-// Type for the context setting function
 // @ts-ignore
 const authLink = setContext((operation: Operation, { headers }) => {
   const token = typeof window !== 'undefined' ? getToken(operation) : '';
