@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { LOGIN_MUTATION } from 'graphql/auth';
-import client from '../apollo.config';
+import { LOG_OUT, LOGIN_MUTATION } from 'graphql/auth';
+import client, { httpLink } from '../apollo.config';
 import { ISignInResponseFormat } from 'types/api-response/auth';
 
 export interface ILoginCredential {
@@ -14,18 +14,16 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt'
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
   providers: [
     CredentialsProvider({
+      id: 'email-login',
       type: 'credentials',
       credentials: {},
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials) return null;
-
         const { email, password } = credentials as ILoginCredential;
-
         try {
-          console.log('email', email);
-          console.log('password', password);
           // Call your GraphQL mutation
           const res = await client.mutate({
             mutation: LOGIN_MUTATION,
@@ -36,7 +34,6 @@ export const authOptions: NextAuthOptions = {
               }
             }
           });
-          console.log('response===>', res);
 
           if (res?.errors && res.errors.length > 0) {
             console.error('GraphQL errors:', res.errors);
@@ -56,6 +53,10 @@ export const authOptions: NextAuthOptions = {
 
           return null;
         } catch (error: any) {
+          console.log('email error', email);
+          console.log('password error', password);
+          // Call your GraphQL mutation
+          console.log('httpLink error', httpLink);
           console.error('Error during authorization:', error);
           throw new Error('Authorization failed');
         }
@@ -64,8 +65,6 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      console.log('🚀 ~ jwt ~ user:', user);
-
       if (user) {
         const userDetail = user as ISignInResponseFormat;
         return {
