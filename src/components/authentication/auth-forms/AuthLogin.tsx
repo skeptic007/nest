@@ -92,7 +92,7 @@ const JWTLogin = (props: AuthLoginProps) => {
             let res = await signIn('email-login', {
               email: values.email,
               password: values.password,
-              redirect: false,
+              redirect: false
               // callbackUrl: '/home'
             });
             console.log('response===>', res);
@@ -145,6 +145,7 @@ const JWTLogin = (props: AuthLoginProps) => {
               setSnackbarOpen(true);
             }
           } catch (error) {
+            console.log('🚀 ~ onSubmit={ ~ error:', error);
             setSnackbarMessage(INVALID_LOGIN_CREDENTIAL);
             setSnackbarOpen(true);
           } finally {
