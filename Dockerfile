@@ -2,7 +2,7 @@ FROM 082670687034.dkr.ecr.ap-southeast-2.amazonaws.com/node:22.4.0-alpine AS bas
 
 WORKDIR /webapp
 COPY package*.json ./
-RUN npm install && npm cache clean --force
+RUN npm install
 
 COPY . .
 RUN npm run build
