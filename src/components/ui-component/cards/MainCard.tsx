@@ -1,19 +1,18 @@
 'use client';
-import React, { Ref } from 'react';
 
 // material-ui
 import Card, { CardProps } from '@mui/material/Card';
 import CardContent, { CardContentProps } from '@mui/material/CardContent';
 import CardHeader, { CardHeaderProps } from '@mui/material/CardHeader';
+import React, { Ref } from 'react';
+
 import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-
-// project-import
-import useConfig from 'hooks/useConfig';
-
+import { KeyedObject } from 'types';
 // types
 import { ThemeMode } from 'types/config';
-import { KeyedObject } from 'types';
+import Typography from '@mui/material/Typography';
+// project-import
+import useConfig from 'hooks/useConfig';
 
 // constant
 const headerSX = {
@@ -25,7 +24,7 @@ const headerSX = {
 export interface MainCardProps extends KeyedObject {
   border?: boolean;
   boxShadow?: boolean;
-  children: React.ReactNode | string;
+  children?: React.ReactNode | string;
   style?: React.CSSProperties;
   content?: boolean;
   className?: string;
