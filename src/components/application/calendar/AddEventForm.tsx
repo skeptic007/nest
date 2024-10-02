@@ -1,6 +1,21 @@
-// material-ui
-import { useTheme } from '@mui/material/styles';
+import '@mui/lab';
+
+// third-party
+// import _ from 'lodash-es';
+import * as Yup from 'yup';
+
+import { Form, FormikProvider, FormikValues, useFormik } from 'formik';
+import { LocalizationProvider, MobileDateTimePicker } from '@mui/x-date-pickers';
+
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import Button from '@mui/material/Button';
+// project imports
+import ColorPalette from './ColorPalette';
+// types
+import { DateRange } from 'types';
+// assets
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import DeleteIcon from '@mui/icons-material/Delete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -18,26 +33,9 @@ import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider, MobileDateTimePicker } from '@mui/x-date-pickers';
-import '@mui/lab';
-
-// third-party
-import _ from 'lodash-es';
-import * as Yup from 'yup';
-import { useFormik, Form, FormikProvider, FormikValues } from 'formik';
-
-// project imports
-import ColorPalette from './ColorPalette';
 import { gridSpacing } from 'store/constant';
-
-// types
-import { DateRange } from 'types';
-
-// assets
-import DateRangeIcon from '@mui/icons-material/DateRange';
-import DeleteIcon from '@mui/icons-material/Delete';
+// material-ui
+import { useTheme } from '@mui/material/styles';
 
 // constant
 const getInitialValues = (event: FormikValues | null, range: DateRange | null) => {
@@ -52,7 +50,7 @@ const getInitialValues = (event: FormikValues | null, range: DateRange | null) =
   };
 
   if (event || range) {
-    return _.merge({}, newEvent, event);
+    // return _.merge({}, newEvent, event);
   }
 
   return newEvent;
