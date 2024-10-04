@@ -1,16 +1,20 @@
-import { ApolloClient, ApolloError, createHttpLink, InMemoryCache, Observable, Operation } from '@apollo/client';
+import { ApolloClient, ApolloError, InMemoryCache, Observable, Operation, createHttpLink } from '@apollo/client';
+import { AuthStatusCode, AuthenticationStatus } from 'store/constant';
+import { getSession, signOut } from 'next-auth/react';
+
+import { REFRESH_TOKEN_MUTATION } from 'graphql/auth';
 import { onError } from '@apollo/client/link/error';
+import { openSnackbar } from 'store/slices/snackbar';
 import { setContext } from '@apollo/client/link/context';
 import { store } from 'store';
-import { openSnackbar } from 'store/slices/snackbar';
-import { getSession, signOut } from 'next-auth/react';
-import { AuthenticationStatus, AuthStatusCode } from 'store/constant';
-import { REFRESH_TOKEN_MUTATION } from 'graphql/auth';
 
 console.log('backend-url', process.env.NEXT_PUBLIC_API_ENDPOINT);
 
 export const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_API_ENDPOINT
+  uri: process.env.NEXT_PUBLIC_API_ENDPOINT,
+  fetchOptions: {
+    timeout: 10000 // Increase the timeout to 10 seconds (adjust as needed)
+  }
 });
 
 console.log('🚀 ~ httpLink:', httpLink);
